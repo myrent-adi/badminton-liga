@@ -205,7 +205,7 @@ body.modal-open{overflow:hidden}
 #resultModal .result-preview.result-has-winner{background:#063b31;border-color:#27eaa4;color:#e3fff2}
 #resultModal .result-submit{margin-top:25px;background:linear-gradient(110deg,#0bbcf1,#0658e2);color:white;font-size:16px;min-height:54px}
 @media(max-width:360px){#resultModal .result-players-grid{grid-template-columns:1fr}#resultModal .result-point-row{grid-template-columns:49px minmax(0,1fr) 9px minmax(0,1fr) 25px;gap:5px}}
-</style>
+.result-point-detail{font-size:12px;color:#bbd9f0;margin-top:10px;text-align:center}.result-card-note{font-size:13px;color:#d6edfa;margin:10px 0 0;overflow-wrap:anywhere}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -782,7 +782,7 @@ function renderResults(){
   const namesA=node('span','result-team'+(r.setsA>r.setsB?' winning':''),Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A');
   const namesB=node('span','result-team'+(r.setsB>r.setsA?' winning':''),Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B');
   const points=node('strong','result-points',String(r.setsA)+' : '+String(r.setsB));
-  score.append(namesA,points,namesB);item.append(meta,score);host.append(item);
+  score.append(namesA,points,namesB);item.append(meta,score);if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
  }
  for(const r of sorted.slice(0,3)){
    const row=node('div','recent-result-row');
