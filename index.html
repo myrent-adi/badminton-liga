@@ -612,6 +612,34 @@ $('togglePlayerEditMode').addEventListener('click',()=>{
  document.querySelectorAll('#playersList .player-admin-actions').forEach(el=>el.classList.toggle('hidden',!playerEditMode));
  if(!playerEditMode)finishEditPlayer();
 });
+function openPlayerModal(){
+ if(!['owner','admin'].includes(currentRole))return;
+ playerModalReturnFocus=document.activeElement;
+ $('playerFormFeedback').textContent='';
+ show('playersAdmin',true);$('playersAdmin').setAttribute('aria-hidden','false');
+ document.body.classList.add('modal-open');$('playerName').focus();
+}
+function closePlayerModal(){
+ show('playersAdmin',false);$('playersAdmin').setAttribute('aria-hidden','true');
+ if($('trainingModal').classList.contains('hidden')&&$('attendanceModal').classList.contains('hidden')&&$('resultModal').classList.contains('hidden'))document.body.classList.remove('modal-open');
+ if(playerModalReturnFocus&&document.contains(playerModalReturnFocus))playerModalReturnFocus.focus();
+ playerModalReturnFocus=null;
+}
+// Keep the dialog above the fixed bottom navigation.
+document.body.appendChild($('playersAdmin'));
+$('openPlayerModal').addEventListener('click',openPlayerModal);
+$('closePlayerModal').addEventListener('click',closePlayerModal);
+$('playersAdmin').addEventListener('click',e=>{if(e.target===$('playersAdmin'))closePlayerModal()});
+document.addEventListener('keydown',e=>{
+ if($('playersAdmin').classList.contains('hidden'))return;
+ if(e.key==='Escape'){e.preventDefault();closePlayerModal();return}
+ if(e.key==='Tab'){
+  const items=Array.from($('playersAdmin').querySelectorAll('button:not(:disabled),input:not(:disabled)')).filter(n=>n.offsetParent!==null);
+  if(!items.length)return;
+  if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items[items.length-1].focus()}
+  else if(!e.shiftKey&&document.activeElement===items[items.length-1]){e.preventDefault();items[0].focus()}
+ }
+});
 function beginEditPlayer(id){
   if(!['owner','admin'].includes(currentRole))return;
   const player=playersCache.find(p=>p.id===id);if(!player)return;
