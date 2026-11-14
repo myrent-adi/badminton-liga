@@ -288,6 +288,32 @@ body.modal-open{overflow:hidden}
 .results-day-number{font-size:24px;line-height:1.15;color:var(--ink)}
 .results-day-count{font-size:11px;font-weight:650;color:var(--muted)}
 .results-day-summary{font-size:13px;color:var(--muted);font-weight:750;margin:2px 2px 9px}
+/* Center month arrows beside the month label on both Treninzi and Rezultati. */
+.training-month-nav,.training-month-nav.results-month-nav{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:clamp(8px,3vw,16px);
+ margin:0 0 14px;
+}
+.training-month-nav h3{
+ flex:0 1 auto;
+ min-width:0;
+ width:clamp(138px,43vw,188px);
+ text-align:center;
+ margin:0;
+ font-size:18px;
+ line-height:1.25;
+}
+.training-month-nav button{
+ width:44px;
+ height:44px;
+ flex:0 0 44px;
+}
+@media(max-width:350px){
+ .training-month-nav h3{width:135px;font-size:16px}
+ .training-month-nav{gap:7px}
+}
 </style>
 </head>
 <body>
