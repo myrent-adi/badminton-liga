@@ -271,6 +271,15 @@ body.modal-open{overflow:hidden}
 .result-score-doubles .result-player-name{padding:2px 0}
 .result-score-doubles .result-points{font-size:23px;text-align:center;align-self:center}
 @media(max-width:390px){.result-score{grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:5px}.result-score-doubles .result-team{font-size:11px}.result-score-doubles .result-points{font-size:20px}}
+
+#resultModal .result-player-side{min-width:0}
+#resultModal .result-side-title{font-size:15px;font-weight:850;color:#eaf8ff;margin:4px 0 10px;padding:8px 10px;border-radius:10px;background:#0b395b;border:1px solid #396f99}
+#resultModal .result-opponents-side .result-side-title{background:#17344e;border-color:#597e9c}
+#resultModal .result-player-side .field{margin:10px 0}
+@media(prefers-color-scheme:light){
+ #resultModal .result-side-title{background:#e5f2ff;color:#144d79;border-color:#bddbf4}
+ #resultModal .result-opponents-side .result-side-title{background:#eef1fb;color:#334c72;border-color:#d3dded}
+}
 </style>
 </head>
 <body>
@@ -347,10 +356,16 @@ body.modal-open{overflow:hidden}
 <label class="field" id="resultDateField">Datum meča<input id="resultDate" type="date" required></label>
 <div class="result-form-section">👥 Igrači</div>
 <div class="result-players-grid">
- <label class="field">Tim A · Igrač 1<select id="resultA1" required></select></label>
- <label class="field">Tim B · Igrač 1<select id="resultB1" required></select></label>
- <label class="field result-extra hidden" id="resultA2Field">Tim A · Igrač 2<select id="resultA2"></select></label>
- <label class="field result-extra hidden" id="resultB2Field">Tim B · Igrač 2<select id="resultB2"></select></label>
+ <div class="result-player-side">
+  <h3 class="result-side-title">🏸 Moja ekipa</h3>
+  <label class="field">Igrač 1<select id="resultA1" required></select></label>
+  <label class="field result-extra hidden" id="resultA2Field">Igrač 2<select id="resultA2"></select></label>
+ </div>
+ <div class="result-player-side result-opponents-side">
+  <h3 class="result-side-title">⚔️ Protivnici</h3>
+  <label class="field">Igrač 1<select id="resultB1" required></select></label>
+  <label class="field result-extra hidden" id="resultB2Field">Igrač 2<select id="resultB2"></select></label>
+ </div>
 </div>
 <div class="result-form-section">🏆 Rezultat meča <span class="result-section-desc">Unesi bodove po setovima</span></div>
 <div id="resultSetRows"></div>
