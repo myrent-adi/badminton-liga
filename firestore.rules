@@ -125,6 +125,57 @@ service cloud.firestore {
         allow delete: if false;
       }
     }
+    // Results are shared with approved members. Only admins may add results.
+    match /results/{resultId} {
+      allow get, list: if isMember();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly([
+          'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
+          'setsA', 'setsB', 'createdBy', 'createdAt'
+        ])
+        && request.resource.data.keys().hasAll([
+          'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
+          'setsA', 'setsB', 'createdBy', 'createdAt'
+        ])
+        && request.resource.data.date is string
+        && request.resource.data.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
+        && request.resource.data.type in ['singles', 'doubles']
+        && request.resource.data.teamA is list
+        && request.resource.data.teamB is list
+        && request.resource.data.teamANames is list
+        && request.resource.data.teamBNames is list
+        && request.resource.data.teamA.size() == (request.resource.data.type == 'singles' ? 1 : 2)
+        && request.resource.data.teamB.size() == request.resource.data.teamA.size()
+        && request.resource.data.teamANames.size() == request.resource.data.teamA.size()
+        && request.resource.data.teamBNames.size() == request.resource.data.teamB.size()
+        && request.resource.data.teamA[0] is string
+        && request.resource.data.teamB[0] is string
+        && request.resource.data.teamANames[0] is string
+        && request.resource.data.teamBNames[0] is string
+        && request.resource.data.teamANames[0].size() <= 80
+        && request.resource.data.teamBNames[0].size() <= 80
+        && (request.resource.data.type == 'singles' || (
+          request.resource.data.teamA[1] is string
+          && request.resource.data.teamB[1] is string
+          && request.resource.data.teamANames[1] is string
+          && request.resource.data.teamBNames[1] is string
+          && request.resource.data.teamANames[1].size() <= 80
+          && request.resource.data.teamBNames[1].size() <= 80
+        ))
+        && request.resource.data.teamA.hasOnly(request.resource.data.teamA)
+        && request.resource.data.teamA.toSet().intersection(request.resource.data.teamB.toSet()).size() == 0
+        && request.resource.data.teamA.toSet().size() == request.resource.data.teamA.size()
+        && request.resource.data.teamB.toSet().size() == request.resource.data.teamB.size()
+        && request.resource.data.setsA is int
+        && request.resource.data.setsB is int
+        && (
+          (request.resource.data.setsA == 2 && request.resource.data.setsB in [0, 1])
+          || (request.resource.data.setsB == 2 && request.resource.data.setsA in [0, 1])
+        )
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
     match /{document=**} {
       allow read, write: if false;
     }
