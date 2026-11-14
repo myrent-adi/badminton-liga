@@ -51,6 +51,13 @@
  .zagreb-skyline{width:100%;right:-135px;height:94%;bottom:-5px;opacity:.86}
  .main{margin-top:-25px}
 }
+
+/* Only the home screen has the full logo and Zagreb skyline header. */
+body.subpage .hero{display:none}
+body.subpage .main{margin-top:0;padding-top:18px}
+body.subpage #screen-more #accountCard{margin-top:0}
+.hero-title{padding-right:0}
+@media(max-width:480px){.hero-title{padding-right:0;padding-top:0}}
 </style>
 </head>
 <body>
@@ -76,7 +83,7 @@
  </div>
  <div class="wrap hero-inner"><img class="logo" src="./assets/silent-zagreb-logo.jpg" alt="Logo Silent Zagreb Badminton">
  <div class="hero-title"><h1>Silent Zagreb<br>Badminton</h1><p>Zajednica gluhih i nagluhih iz Zagreba <span aria-label="Pristupačno za gluhe i nagluhe">🤟</span></p></div>
- <div class="hero-controls"><button class="header-action" id="headerAlerts" type="button" title="Obavijesti" aria-label="Obavijesti">🔔</button><button class="header-action" id="headerProfile" type="button" title="Moj profil" aria-label="Moj profil">👤</button></div></div>
+ </div>
  </header>
 <main class="wrap main">
 <section id="loading" class="card loading" aria-live="polite"><h2>Učitavanje…</h2><p class="muted">Provjeravamo Google prijavu i Firebase.</p></section>
@@ -111,9 +118,7 @@ const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle(
 function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[]}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
-$('headerProfile').addEventListener('click',()=>{if(!$('bottomNav').classList.contains('hidden'))navigate('more')});
-$('headerAlerts').addEventListener('click',()=>{if(!$('bottomNav').classList.contains('hidden')){navigate('more');notify('Obavijesti ćemo uključiti u sljedećoj nadogradnji.')}});
-function navigate(name){document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
+function navigate(name){document.body.classList.toggle('subpage',name!=='home');document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>navigate(button.dataset.go)));
 $('login').addEventListener('click',async()=>{const button=$('login');button.disabled=true;notify('');try{await signInWithPopup(auth,provider)}catch(error){notify(readableError(error),true)}finally{button.disabled=false}});
 $('logout').addEventListener('click',async()=>{try{await signOut(auth)}catch(error){notify(readableError(error),true)}});
@@ -176,7 +181,7 @@ $('adminCount').textContent=`${users.length} registriranih · ${users.filter(use
 const host=$('userRows');host.replaceChildren();if(!users.length){host.append(node('p','muted','Još nema registriranih igrača.'));return}
 for(const user of users){const row=node('div','user-row'),info=node('div'),name=node('strong','',user.displayName||'Nepoznati igrač'),mail=node('small','',user.email||''),status=node('span','pill '+(user.status==='approved'?'ok':user.status==='rejected'?'no':''),user.status==='approved'?'Odobren':user.status==='rejected'?'Odbijen':'Čeka');info.append(name,mail,status);row.append(info);const actions=node('div','actions');if(user.status!=='approved'){const b=node('button','button','✓ Odobri');b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b)}if(user.status!=='rejected'){const b=node('button','button danger','Odbij');b.addEventListener('click',()=>changeStatus(user.id,'rejected',b));actions.append(b)}row.append(actions);host.append(row)}}
 async function changeStatus(uid,status,button){button.disabled=true;try{await updateDoc(doc(db,'users',uid),{status});notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.')}catch(error){notify(readableError(error),true)}finally{button.disabled=false}}
-onAuthStateChanged(auth,async user=>{const current=++generation;clearWatches();show('loading',false);show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);show('playersAdmin',false);currentRole='player';playersCache=[];finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
+onAuthStateChanged(auth,async user=>{const current=++generation;clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);show('playersAdmin',false);currentRole='player';playersCache=[];finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;$('myProfileLabel').textContent=user.displayName||'Moj profil';$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
 try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('playersAdmin',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
 const unProfile=onSnapshot(userRef,snapshot=>{if(current!==generation)return;statusView(snapshot.exists()?snapshot.data().status:'pending',role)},error=>notify(readableError(error),true));unsubscribers.push(unProfile);
