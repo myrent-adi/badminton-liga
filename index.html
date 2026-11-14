@@ -323,6 +323,21 @@ body.modal-open{overflow:hidden}
  .training-month-nav h3{font-size:17px}
  .training-month-nav{column-gap:6px}
 }
+
+/* Results list: larger readable names, abbreviated surnames and no repeated dates. */
+.result-card{padding:17px;margin-bottom:13px}
+.result-meta{font-size:13px;font-weight:750;margin-bottom:14px}
+.result-score{grid-template-columns:minmax(0,1fr) minmax(62px,auto) minmax(0,1fr);gap:9px}
+.result-team,.result-score-doubles .result-team{font-size:clamp(15px,3.9vw,18px);font-weight:800;line-height:1.35}
+.result-score-doubles .result-team{gap:9px}
+.result-player-name{overflow-wrap:normal;word-break:normal}
+.result-points,.result-score-doubles .result-points{font-size:clamp(23px,6vw,28px)}
+.result-point-detail{font-size:13px;line-height:1.5;margin-top:13px}
+@media(max-width:390px){
+ .result-score{grid-template-columns:minmax(0,1fr) 62px minmax(0,1fr);gap:6px}
+ .result-team,.result-score-doubles .result-team{font-size:15px}
+ .result-points,.result-score-doubles .result-points{font-size:23px}
+}
 </style>
 </head>
 <body>
@@ -982,6 +997,12 @@ function moveResultsMonth(delta){
 }
 $('resultsPrevMonth').addEventListener('click',()=>moveResultsMonth(-1));
 $('resultsNextMonth').addEventListener('click',()=>moveResultsMonth(1));
+function shortResultPlayerName(fullName){
+ const name=String(fullName||'').trim().replace(/\s+/g,' ');
+ const words=name.split(' ').filter(Boolean);
+ if(words.length<2)return name;
+ return words[0]+' '+words.slice(1).map(part=>part[0].toLocaleUpperCase('hr')+'.').join(' ');
+}
 function renderResults(){
  const host=$('resultsList'),recent=$('homeRecentResults');host.replaceChildren();recent.replaceChildren();
  const sorted=[...resultsCache].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id).localeCompare(String(a.id)));
@@ -1013,13 +1034,13 @@ function renderResults(){
  const visible=monthResults.filter(r=>r.date===resultsSelectedDay);
  for(const r of visible){
   const item=node('article','result-card');
-  const meta=node('div','result-meta',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno'));
+  const meta=node('div','result-meta',r.type==='doubles'?'Parovi':'Pojedinačno');
   const doubles=r.type==='doubles';
   const score=node('div','result-score'+(doubles?' result-score-doubles':''));
   function teamNames(names,winner,fallback){
    const team=node('div','result-team'+(winner?' winning':''));
    const members=Array.isArray(names)&&names.length?names:[fallback];
-   for(const name of members)team.append(node('span','result-player-name',String(name)));
+   for(const name of members){const display=node('span','result-player-name',shortResultPlayerName(name));display.title=String(name);team.append(display)}
    return team;
   }
   const namesA=teamNames(r.teamANames,r.setsA>r.setsB,'Tim A');
