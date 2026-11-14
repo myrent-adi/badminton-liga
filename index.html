@@ -205,7 +205,7 @@ body.modal-open{overflow:hidden}
 #resultModal .result-preview.result-has-winner{background:#063b31;border-color:#27eaa4;color:#e3fff2}
 #resultModal .result-submit{margin-top:25px;background:linear-gradient(110deg,#0bbcf1,#0658e2);color:white;font-size:16px;min-height:54px}
 @media(max-width:360px){#resultModal .result-players-grid{grid-template-columns:1fr}#resultModal .result-point-row{grid-template-columns:49px minmax(0,1fr) 9px minmax(0,1fr) 25px;gap:5px}}
-.result-point-detail{font-size:12px;color:#bbd9f0;margin-top:10px;text-align:center}.result-card-note{font-size:13px;color:#d6edfa;margin:10px 0 0;overflow-wrap:anywhere}</style>
+.result-point-detail{font-size:12px;color:#bbd9f0;margin-top:10px;text-align:center}.result-card-note{font-size:13px;color:#d6edfa;margin:10px 0 0;overflow-wrap:anywhere}body.result-screen-open #bottomNav{display:none!important}body.result-screen-open #resultModal{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:1000}body.result-screen-open #resultModal .result-fullscreen{min-height:100vh;min-height:100dvh;height:100vh;height:100dvh}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -727,15 +727,17 @@ function openResultModal(){
  const today=new Date();$('resultDate').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
  $('resultSetRows').replaceChildren(buildResultSet(1),buildResultSet(2));show('resultAddSet',true);
  populateResultTrainings();populateResultPlayers();resultTypeChanged();$('resultDateField').classList.remove('hidden');
- show('resultModal',true);$('resultModal').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
+ show('resultModal',true);$('resultModal').setAttribute('aria-hidden','false');document.body.classList.add('modal-open','result-screen-open');
  $('closeResultModal').focus();
 }
 function closeResultModal(){
- show('resultModal',false);$('resultModal').setAttribute('aria-hidden','true');
+ show('resultModal',false);$('resultModal').setAttribute('aria-hidden','true');document.body.classList.remove('result-screen-open');
  if($('trainingModal').classList.contains('hidden')&&$('attendanceModal').classList.contains('hidden'))document.body.classList.remove('modal-open');
  if(resultModalReturnFocus&&document.contains(resultModalReturnFocus))resultModalReturnFocus.focus();
  resultModalReturnFocus=null;
 }
+// Keep the full-screen editor outside page layout and stacking contexts.
+document.body.appendChild($('resultModal'));
 $('openResultModal').addEventListener('click',openResultModal);
 $('closeResultModal').addEventListener('click',closeResultModal);
 document.addEventListener('keydown',e=>{
