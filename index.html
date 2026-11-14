@@ -2,7 +2,7 @@
 <html lang="hr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#061426"><meta name="description" content="Silent Zagreb Badminton – privatna liga, treninzi i rezultati">
+<meta name="theme-color" content="#04162e"><meta name="description" content="Silent Zagreb Badminton – privatna liga, treninzi i rezultati">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Silent Zagreb">
 <link rel="manifest" href="./manifest.webmanifest?v=2"><link rel="icon" type="image/png" sizes="192x192" href="./icons/silent-logo-192.png"><link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon.png">
 <title>Silent Zagreb Badminton</title>
@@ -18,6 +18,39 @@
 .launch-screen small{font-size:14px;color:#bdd8ed}
 .launch-screen.leaving{opacity:0}
 @media(prefers-reduced-motion:reduce){.launch-screen{transition:none}}
+
+/* Header and home screen based on the Silent Zagreb Badminton design reference. */
+.hero{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(125deg,#051528 2%,#092c58 55%,#041d3d);border-bottom:1px solid #158fca;padding:24px 0 44px;min-height:202px}
+.hero:after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(1,12,29,.10),rgba(0,18,44,.04) 60%,rgba(0,12,34,.12)),radial-gradient(ellipse at 65% 90%,rgba(24,80,145,.38),transparent 57%)}
+.hero-night{position:absolute;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.zagreb-skyline{position:absolute;right:-65px;bottom:-14px;width:min(82%,690px);height:100%;opacity:.93}
+.hero-inner{position:relative;align-items:center;min-height:130px;gap:15px}
+.hero .logo{width:111px;height:111px;border:2px solid #1cc9fc;box-shadow:0 8px 25px #0007;z-index:1}
+.hero-title{flex:1;min-width:0;padding-right:54px;text-shadow:0 2px 7px #001024}
+.hero h1{font-size:clamp(23px,5.1vw,34px);font-weight:850;line-height:1.05;margin:0 0 12px}
+.hero p{font-size:13px;color:#fff;line-height:1.3;max-width:355px}
+.hero-controls{position:absolute;right:8px;top:0;display:flex;gap:9px}
+.header-action{color:white;background:#02152d70;border:1px solid #4ca8d955;border-radius:12px;font-size:25px;width:40px;height:40px;display:grid;place-items:center;cursor:pointer}
+.header-action:hover{background:#1a4772}
+.main{padding-top:0;position:relative;z-index:1;margin-top:-27px}
+.next-training-card{background:linear-gradient(130deg,#06294a,#041b33);border:1px solid #16b4ee;color:#fff;box-shadow:0 10px 28px #001b3550;padding:18px 16px;border-radius:17px}
+.next-training-card .eyeline{color:#bbecff;font-size:14px}
+.next-training-card .datebig{font-size:clamp(20px,4.3vw,25px)}
+.next-training-card .muted{color:#cbddeb}
+.next-training-card .badge{color:#062b17;background:linear-gradient(#4dec8e,#0dc365);white-space:nowrap}
+#accountMount #accountCard{margin-bottom:13px}
+@media(max-width:480px){
+ .hero{padding:23px 0 40px;min-height:188px}
+ .hero .logo{width:82px;height:82px}
+ .hero-inner{gap:11px;min-height:116px}
+ .hero h1{font-size:clamp(22px,6vw,29px)}
+ .hero p{font-size:11px}
+ .hero-title{padding-right:12px;padding-top:26px}
+ .hero-controls{top:-10px;right:8px}
+ .header-action{width:33px;height:35px;font-size:21px}
+ .zagreb-skyline{width:100%;right:-135px;height:94%;bottom:-5px;opacity:.86}
+ .main{margin-top:-25px}
+}
 </style>
 </head>
 <body>
@@ -25,15 +58,34 @@
 <script>
 (function(){const el=document.getElementById('launchScreen');let standalone=window.matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;const finish=()=>{el.classList.add('leaving');setTimeout(()=>el.remove(),300)};if(standalone)setTimeout(finish,950);else finish();})();
 </script>
-<header class="hero"><div class="wrap hero-inner"><img class="logo" src="./assets/silent-zagreb-logo.jpg" alt="Logo Silent Zagreb Badminton"><div><div class="eyebrow">🏸 Privatna badminton zajednica</div><h1>Silent Zagreb<br>Badminton</h1><p>Zajednica gluhih i nagluhih iz Zagreba</p></div></div></header>
+<header class="hero">
+ <div class="hero-night" aria-hidden="true">
+   <svg class="zagreb-skyline" viewBox="0 0 760 220" preserveAspectRatio="xMaxYMax meet" xmlns="http://www.w3.org/2000/svg">
+     <defs><linearGradient id="spireGlow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#ffd16d"/><stop offset="1" stop-color="#d96b19"/></linearGradient></defs>
+     <path d="M0 174 Q55 154 109 171 T218 163 T320 173 T440 164 T540 167 L760 165 V220 H0Z" fill="#07142d"/>
+     <path d="M0 190 L20 178 26 185 44 174 67 185 91 172 111 182 129 170 145 186 165 173 197 187 211 176 235 189 263 174 282 185 317 175 353 188 379 171 405 183 432 169 466 188 502 175 520 183 549 171 575 184 606 174 631 187 669 173 700 181 760 170 V220 H0Z" fill="#03101f"/>
+     <g transform="translate(559 28)" fill="url(#spireGlow)" stroke="#fdab44" stroke-width="1">
+       <path d="M21 127V42L31 1L41 42V127Z"/><path d="M77 127V42L87 1L97 42V127Z"/>
+       <path d="M15 127V71H103V127Z"/><path d="M31 1V-6M87 1V-6" stroke="#f7d38c" stroke-width="2"/>
+       <path d="M26 48H36M82 48H92M26 64H36M82 64H92M26 81H36M82 81H92" stroke="#5c331a" stroke-width="3"/>
+       <path d="M15 98H103M51 127V101Q59 92 67 101V127" fill="#80451d" stroke="#e9a34a"/>
+       <path d="M18 72L21 47 41 47 45 72M73 72L77 47 97 47 101 72" fill="none"/>
+     </g>
+     <path d="M0 207Q160 193 279 205T539 204T760 204V220H0Z" fill="#020e20"/>
+   </svg>
+ </div>
+ <div class="wrap hero-inner"><img class="logo" src="./assets/silent-zagreb-logo.jpg" alt="Logo Silent Zagreb Badminton">
+ <div class="hero-title"><h1>Silent Zagreb<br>Badminton</h1><p>Zajednica gluhih i nagluhih iz Zagreba <span aria-label="Pristupačno za gluhe i nagluhe">🤟</span></p></div>
+ <div class="hero-controls"><button class="header-action" id="headerAlerts" type="button" title="Obavijesti" aria-label="Obavijesti">♧</button><button class="header-action" id="headerProfile" type="button" title="Moj profil" aria-label="Moj profil">♙</button></div></div>
+ </header>
 <main class="wrap main">
 <section id="loading" class="card loading" aria-live="polite"><h2>Učitavanje…</h2><p class="muted">Provjeravamo Google prijavu i Firebase.</p></section>
 <section id="signedOut" class="card hidden"><h2>Dobrodošli u ligu</h2><p>Prijavi se svojim Google računom. Ne treba ti nova lozinka.</p><button type="button" class="button google" id="login"><strong>G</strong> Nastavi s Googleom</button><p class="muted">Novi članovi čekaju odobrenje administratora.</p></section>
 <div id="signedArea" class="hidden">
-<section class="card"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div><button type="button" class="button secondary" id="logout">Odjava</button></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div></section>
+<section class="card" id="accountCard"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div><button type="button" class="button secondary" id="logout">Odjava</button></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div></section>
 <div id="approvedArea" class="hidden">
 <section class="section active" id="screen-home">
-<div class="card"><div class="between"><div><div class="eyeline">📅 Sljedeći trening</div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><p class="muted" style="margin:7px 0 0">Raspored će se pojaviti nakon što administrator doda prvi trening.</p></div><span class="badge">U pripremi</span></div></div>
+<div class="card next-training-card"><div class="between"><div><div class="eyeline">▣ Sljedeći trening</div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><p class="muted" style="margin:7px 0 0">Raspored će se pojaviti nakon što administrator doda prvi trening.</p></div><span class="badge">U pripremi</span></div></div>
 <div class="card"><div class="between"><h2>👥 Dolaznost na trening</h2><span class="muted">21 član · cilj grupe</span></div><div class="stats"><div class="stat go"><b>–</b><span>Dolaze</span></div><div class="stat no"><b>–</b><span>Ne dolaze</span></div><div class="stat maybe"><b>–</b><span>Možda</span></div><div class="stat"><b>–</b><span>Bez odgovora</span></div></div><p class="muted">Podaci će se prikazati kada uključimo prijave za trening. Ne prikazujemo izmišljene dolaske.</p></div>
 <div class="mini-nav" style="margin-bottom:13px"><button class="tile" data-go="results"><span class="icon">🏆</span>Rezultati</button><button class="tile" data-go="results"><span class="icon">🏸</span>Dodaj rezultat</button><button class="tile" data-go="trainings"><span class="icon">📅</span>Raspored</button></div>
 <div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2><button type="button" class="button secondary" data-go="results">Pogledaj sve →</button></div><div class="hint">Još nema rezultata u Firestoreu. Prikazivat ćemo samo stvarno spremljene mečeve.</div></div>
@@ -41,7 +93,7 @@
 <section class="section" id="screen-trainings"><div class="card"><h2>📅 Treninzi</h2><div class="hint">Raspored, sezonske pauze i prijave dolazaka bit će uključeni u sljedećoj funkcionalnoj nadogradnji. Administrator će moći birati dane i vrijeme treninga.</div></div></section>
 <section class="section" id="screen-results"><div class="card"><h2>🏆 Rezultati</h2><div class="hint">Ovdje ćemo dodati unos pojedinačnih mečeva i parova, rezultate setova i automatski izračun pobjednika. Zasad nije aktivan unos, da se ne bi spremali nepotpuni podaci.</div></div></section>
 <section class="section" id="screen-players"><div class="card"><h2>👥 Igrači</h2><p class="muted">Ovdje su članovi koje je u ligu dodao administrator, uključujući one bez aplikacije.</p><p id="playersCount" class="player-count" aria-live="polite">Učitavanje popisa…</p><div id="playersList" class="player-list"></div></div><div class="card hidden" id="editPlayerCard"><h2>✏️ Uredi igrača</h2><form id="editPlayerForm"><label class="field">Ime i prezime<input id="editPlayerName" maxlength="80" required autocomplete="off"></label><div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div><div class="card hidden" id="playersAdmin"><h2>➕ Dodaj igrača</h2><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Povezivanje s Google računom dodat ćemo naknadno.</p></div></section>
-<section class="section" id="screen-more"><div class="card"><h2>☰ Više</h2><div class="entry"><strong>Moj profil</strong><small id="myProfileLabel">Google račun</small></div><div class="entry"><strong>Izgled aplikacije</strong><small>Automatski: prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Obavijesti</strong><small>Vizualne obavijesti i podsjetnici bit će dodani kasnije.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju (ako je ponuđeno).</small></div></div><div id="admin" class="card hidden"><h2 id="adminHeading">👑 Administracija · prijave članova</h2><p class="muted">Odobri ili odbij novog igrača. Ovo je postojeća funkcionalnost Firebasea, sačuvana u novom dizajnu.</p><div class="muted" id="adminCount">Učitavanje…</div><div id="userRows"></div></div></section>
+<section class="section" id="screen-more"><div id="accountMount"></div><div class="card"><h2>☰ Više</h2><div class="entry"><strong>Moj profil</strong><small id="myProfileLabel">Google račun</small></div><div class="entry"><strong>Izgled aplikacije</strong><small>Automatski: prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Obavijesti</strong><small>Vizualne obavijesti i podsjetnici bit će dodani kasnije.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju (ako je ponuđeno).</small></div></div><div id="admin" class="card hidden"><h2 id="adminHeading">👑 Administracija · prijave članova</h2><p class="muted">Odobri ili odbij novog igrača. Ovo je postojeća funkcionalnost Firebasea, sačuvana u novom dizajnu.</p><div class="muted" id="adminCount">Učitavanje…</div><div id="userRows"></div></div></section>
 </div>
 <section id="pending" class="card hidden"><h2>⏳ Zahtjev je poslan</h2><p>Registracija je zabilježena. Administrator treba odobriti tvoj pristup. Ovaj ekran automatski će se osvježiti nakon odobrenja.</p></section>
 <section id="rejected" class="card hidden"><h2>Pristup nije odobren</h2><p>Administrator je odbio zahtjev. Obrati se voditelju grupe ako je došlo do pogreške.</p></section>
@@ -59,11 +111,13 @@ const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle(
 function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[]}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
+$('headerProfile').addEventListener('click',()=>{if(!$('bottomNav').classList.contains('hidden'))navigate('more')});
+$('headerAlerts').addEventListener('click',()=>{if(!$('bottomNav').classList.contains('hidden')){navigate('more');notify('Obavijesti ćemo uključiti u sljedećoj nadogradnji.')}});
 function navigate(name){document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>navigate(button.dataset.go)));
 $('login').addEventListener('click',async()=>{const button=$('login');button.disabled=true;notify('');try{await signInWithPopup(auth,provider)}catch(error){notify(readableError(error),true)}finally{button.disabled=false}});
 $('logout').addEventListener('click',async()=>{try{await signOut(auth)}catch(error){notify(readableError(error),true)}});
-function statusView(status,role){const isAdmin=role==='owner'||role==='admin';const approved=isAdmin||status==='approved';show('pending',!approved&&status==='pending');show('rejected',!approved&&status==='rejected');show('approvedArea',approved);show('bottomNav',approved);$('profileStatus').textContent=role==='owner'?'👑 Vlasnik aplikacije · pristup odobren':isAdmin?'🛡️ Administrator · pristup odobren':approved?'✅ Odobren igrač':status==='rejected'?'❌ Odbijen zahtjev':'⏳ Čeka odobrenje';$('profileStatus').className='notice '+(approved?'good':status==='rejected'?'bad':'warn');show('uidArea',!isAdmin);if(approved)navigate('home')}
+function statusView(status,role){const isAdmin=role==='owner'||role==='admin';const approved=isAdmin||status==='approved';const account=$('accountCard');if(approved){$('accountMount').append(account)}else{$('signedArea').insertBefore(account,$('approvedArea'))}show('pending',!approved&&status==='pending');show('rejected',!approved&&status==='rejected');show('approvedArea',approved);show('bottomNav',approved);$('profileStatus').textContent=role==='owner'?'👑 Vlasnik aplikacije · pristup odobren':isAdmin?'🛡️ Administrator · pristup odobren':approved?'✅ Odobren igrač':status==='rejected'?'❌ Odbijen zahtjev':'⏳ Čeka odobrenje';$('profileStatus').className='notice '+(approved?'good':status==='rejected'?'bad':'warn');show('uidArea',!isAdmin);if(approved)navigate('home')}
 let editingPlayerId=null;
 function displayPlayers(snapshot){playersCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderPlayers()}
 function normalizedPlayerName(name){return String(name||'').trim().replace(/\s+/g,' ')}
