@@ -41,8 +41,8 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /admins/{adminId} {
-      allow get: if signedIn() && (request.auth.uid == adminId || isOwner());
-      allow list: if isOwner();
+      allow get: if isMember();
+      allow list: if isMember();
       allow create: if isOwner()
         && request.resource.data.keys().hasOnly(['role'])
         && request.resource.data.role == 'admin';
@@ -61,12 +61,25 @@ service cloud.firestore {
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time;
       allow update: if isAdmin()
-        && request.resource.data.keys().hasOnly(['name', 'active', 'createdBy', 'createdAt'])
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'active'])
+        && request.resource.data.keys().hasOnly(['name', 'active', 'createdBy', 'createdAt', 'linkedUid'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'active', 'linkedUid'])
         && request.resource.data.name is string
         && request.resource.data.name.size() >= 2
         && request.resource.data.name.size() <= 80
-        && request.resource.data.active is bool;
+        && request.resource.data.active is bool
+        && (
+          !request.resource.data.keys().hasAny(['linkedUid'])
+          || (
+            request.resource.data.linkedUid is string
+            && (
+              (
+                exists(/databases/$(database)/documents/users/$(request.resource.data.linkedUid))
+                && get(/databases/$(database)/documents/users/$(request.resource.data.linkedUid)).data.status == 'approved'
+              )
+              || exists(/databases/$(database)/documents/admins/$(request.resource.data.linkedUid))
+            )
+          )
+        );
       allow delete: if false;
     }
     // Only owner and admins can manage sessions. Approved members can read.
