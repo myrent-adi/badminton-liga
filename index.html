@@ -655,11 +655,20 @@ function renderTrainings(run){
  refreshTrainingExpiry();
 }
 
+function resultSelectablePlayers(){
+ const players=playersCache.filter(p=>p.active===true).map(p=>({id:p.id,name:p.name||'Igrač',label:p.name||'Igrač'}));
+ const user=auth.currentUser;
+ if(user&&!playersCache.some(p=>p.active===true&&p.linkedUid===user.uid)){
+  const googleName=(user.displayName||'').trim()||'Moj Google račun';
+  players.push({id:'google_'+user.uid,name:googleName,label:googleName+' · Google'});
+ }
+ return players.sort((a,b)=>String(a.name).localeCompare(String(b.name),'hr'));
+}
 function populateResultPlayers(){
- const players=playersCache.filter(p=>p.active===true).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'hr'));
+ const players=resultSelectablePlayers();
  for(const id of ['resultA1','resultA2','resultB1','resultB2']){
   const select=$(id),previous=select.value;select.replaceChildren(new Option('Odaberi igrača',''));
-  for(const p of players)select.add(new Option(p.name||'Igrač',p.id));
+  for(const p of players)select.add(new Option(p.label,p.id));
   if(players.some(p=>p.id===previous))select.value=previous;
  }
 }
@@ -759,13 +768,14 @@ $('resultForm').addEventListener('submit',async e=>{
  const idsB=[$('resultB1').value,...(type==='doubles'?[$('resultB2').value]:[])];
  const ids=[...idsA,...idsB];
  if(ids.some(id=>!id)||new Set(ids).size!==ids.length){msg.textContent='Odaberi različite igrače za oba tima.';return}
- if(ids.some(id=>!playersCache.some(p=>p.id===id&&p.active===true))){msg.textContent='Jedan od igrača više nije aktivan.';return}
+ const selectable=resultSelectablePlayers();
+ if(ids.some(id=>!selectable.some(p=>p.id===id))){msg.textContent='Jedan od igrača više nije dostupan za odabir.';return}
  const sets=getResultSets(),outcome=resultSetOutcome(sets);
  if(!outcome){msg.textContent='Provjeri rezultat: pobjednik mora osvojiti 2 seta, a u svakom setu bodovi moraju biti različiti.';return}
  const training=trainingCache.find(t=>t.id===$('resultTraining').value);
  const date=training?.date||$('resultDate').value;
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg.textContent='Odaberi valjani datum.';return}
- const getName=id=>playersCache.find(p=>p.id===id)?.name||'Igrač';
+ const getName=id=>selectable.find(p=>p.id===id)?.name||'Igrač';
  const record={date,type,teamA:idsA,teamB:idsB,teamANames:idsA.map(getName),teamBNames:idsB.map(getName),
   setsA:outcome.winsA,setsB:outcome.winsB,pointSets:sets,note:$('resultNote').value.trim(),createdBy:auth.currentUser.uid,createdAt:serverTimestamp()};
  if(training)record.trainingId=training.id;
