@@ -178,7 +178,7 @@ body.modal-open{overflow:hidden}
 @media(min-width:700px){
  #attendanceModal .attendance-dialog{padding-left:max(24px,calc((100vw - 730px)/2));padding-right:max(24px,calc((100vw - 730px)/2))}
 }
-.home-attendance-open{border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:9px 11px;min-height:44px;font-size:13px;font-weight:850;white-space:nowrap}.home-attendance-open:not(:disabled){color:var(--accent)}.attendance-heading #homeMemberCount{line-height:1.1}.home-attendance-open:disabled{opacity:.8}@media(max-width:380px){.attendance-heading h2{font-size:15px}.home-attendance-open{padding:8px;font-size:12px}}.training-top-actions{display:flex;align-items:center;gap:9px}.training-edit-trigger{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:21px;box-shadow:var(--shadow)}.training-edit-trigger.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}@media(max-width:360px){.training-top-actions{gap:7px}.training-edit-trigger{width:43px;height:43px}}</style>
+.home-attendance-open{border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:9px 11px;min-height:44px;font-size:13px;font-weight:850;white-space:nowrap}.home-attendance-open:not(:disabled){color:var(--accent)}.attendance-heading #homeMemberCount{line-height:1.1}.home-attendance-open:disabled{opacity:.8}@media(max-width:380px){.attendance-heading h2{font-size:15px}.home-attendance-open{padding:8px;font-size:12px}}.training-top-actions{display:flex;align-items:center;gap:9px}.training-edit-trigger{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:21px;box-shadow:var(--shadow)}.training-edit-trigger.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}@media(max-width:360px){.training-top-actions{gap:7px}.training-edit-trigger{width:43px;height:43px}}.training-event.is-finished{opacity:.5;filter:saturate(.5)}.training-event.is-finished .training-vote{cursor:not-allowed;pointer-events:none}.training-finished-note{margin:0 0 12px;font-size:12px;font-weight:750;color:#bad4e6}.training-event.is-finished .training-attendance-open,.training-event.is-finished .training-admin-actions{opacity:1}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -536,13 +536,33 @@ function moveTrainingMonth(shift){
 }
 $('trainingPrevMonth').addEventListener('click',()=>moveTrainingMonth(-1));
 $('trainingNextMonth').addEventListener('click',()=>moveTrainingMonth(1));
+function trainingHasEnded(t){
+ const end=new Date(String(t.date)+'T'+String(t.end)+':00');
+ return Number.isFinite(end.getTime())&&Date.now()>=end.getTime();
+}
+function refreshTrainingExpiry(){
+ document.querySelectorAll('#trainingsList .training-event').forEach(card=>{
+  const t=trainingCache.find(item=>item.id===card.dataset.trainingId);
+  if(!t)return;
+  const finished=trainingHasEnded(t);
+  card.classList.toggle('is-finished',finished);
+  card.querySelectorAll('.training-vote').forEach(button=>{
+   button.disabled=finished||t.active!==true;
+   button.title=finished?'Trening je završio. Glasanje je zatvoreno.':'';
+  });
+  const label=card.querySelector('.training-finished-note');
+  if(label)label.classList.toggle('hidden',!finished);
+ });
+}
+setInterval(refreshTrainingExpiry,30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTrainingExpiry()});
 function renderTrainings(run){
  trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];trainingVoteData={};
  const list=$('trainingsList');list.replaceChildren();
  $('trainingMonthTitle').textContent=new Intl.DateTimeFormat('hr-HR',{month:'long',year:'numeric'}).format(new Date(trainingShownYear,trainingShownMonth,1)).replace(/^./,c=>c.toLocaleUpperCase('hr'));
  const sorted=[...trainingCache].sort((a,b)=>String(a.date+' '+a.start).localeCompare(String(b.date+' '+b.start)));
  const today=new Date(),nowDate=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
- const upcoming=sorted.find(t=>t.active===true&&t.date>=nowDate);
+ const upcoming=sorted.find(t=>t.active===true&&!trainingHasEnded(t));
  $('nextDate').textContent=upcoming?formatTrainingDate(upcoming.date)+' · '+upcoming.start+' – '+upcoming.end:'Trenutačno nije objavljen';
  $('nextTrainingInfo').textContent=upcoming?'Sljedeći termin prema objavljenom rasporedu.':'Nema nadolazećih termina.';setHomeTraining(upcoming);
  const monthKey=String(trainingShownYear)+'-'+String(trainingShownMonth+1).padStart(2,'0');
@@ -550,7 +570,7 @@ function renderTrainings(run){
  if(openAttendanceTrainingId&&!visible.some(t=>t.id===openAttendanceTrainingId))closeAttendanceModal();
  if(!visible.length){list.append(node('div','hint','Nema treninga za odabrani mjesec. Strelicama možeš pregledati druge mjesece.'));return}
  for(const t of visible){
-  const card=node('article','training-event'+(t.active===true?'':' is-cancelled'));
+  const card=node('article','training-event'+(t.active===true?'':' is-cancelled')+(trainingHasEnded(t)?' is-finished':''));card.dataset.trainingId=t.id;
   const head=node('div','training-event-head'),details=node('div');
   details.append(node('strong','', '▣ '+formatTrainingDate(t.date)),node('span','training-time','◷ '+t.start+' – '+t.end));
   const count=node('button','training-attendees training-attendance-open','👥 0 prijava');
@@ -558,17 +578,19 @@ function renderTrainings(run){
   count.addEventListener('click',()=>openAttendanceModal(t.id));
   head.append(details,count);card.append(head);
   if(t.active!==true)card.append(node('p','training-cancel-note','⛔ Otkazano. Evidencija glasova je sačuvana.'));
+  card.append(node('p','training-finished-note'+(trainingHasEnded(t)?'':' hidden'),'🔒 Trening je završio · glasanje zatvoreno'));
   const responses=node('div','training-responses');
   if(t.active===true){
    const options=[['yes','✅ Dolazim'],['no','❌ Ne dolazim'],['maybe','❔ Možda']];
    for(const [value,label] of options){
-    const button=node('button','training-vote',label);button.type='button';button.dataset.choice=value;
+    const button=node('button','training-vote',label);button.type='button';button.dataset.choice=value;button.disabled=trainingHasEnded(t);
     button.addEventListener('click',async()=>{
      if(!auth.currentUser)return;
+     if(trainingHasEnded(t)){notify('Trening je završio. Glasanje je zatvoreno.',true);refreshTrainingExpiry();return}
      responses.querySelectorAll('button').forEach(b=>b.disabled=true);
      try{const token=await auth.currentUser.getIdTokenResult();const googleName=typeof token.claims.name==='string'?token.claims.name.trim():'';const vote={choice:value,updatedAt:serverTimestamp()};if(googleName)vote.displayName=googleName;await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),vote)}
      catch(error){notify(readableError(error),true)}
-     finally{responses.querySelectorAll('button').forEach(b=>b.disabled=false)}
+     finally{responses.querySelectorAll('button').forEach(b=>b.disabled=trainingHasEnded(t))}
     });responses.append(button);
    }
    card.append(responses);
@@ -596,6 +618,7 @@ function renderTrainings(run){
   });trainingVoteUnsubs.push(un);
 
  }
+ refreshTrainingExpiry();
 }
 
 function populateResultPlayers(){
