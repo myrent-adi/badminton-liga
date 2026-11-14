@@ -178,7 +178,34 @@ body.modal-open{overflow:hidden}
 @media(min-width:700px){
  #attendanceModal .attendance-dialog{padding-left:max(24px,calc((100vw - 730px)/2));padding-right:max(24px,calc((100vw - 730px)/2))}
 }
-.home-attendance-open{border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:9px 11px;min-height:44px;font-size:13px;font-weight:850;white-space:nowrap}.home-attendance-open:not(:disabled){color:var(--accent)}.attendance-heading #homeMemberCount{line-height:1.1}.home-attendance-open:disabled{opacity:.8}@media(max-width:380px){.attendance-heading h2{font-size:15px}.home-attendance-open{padding:8px;font-size:12px}}.training-top-actions{display:flex;align-items:center;gap:9px}.training-edit-trigger{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:21px;box-shadow:var(--shadow)}.training-edit-trigger.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}@media(max-width:360px){.training-top-actions{gap:7px}.training-edit-trigger{width:43px;height:43px}}.training-event.is-finished{opacity:.5;filter:saturate(.5)}.training-event.is-finished .training-vote{cursor:not-allowed;pointer-events:none}.training-finished-note{margin:0 0 12px;font-size:12px;font-weight:750;color:#bad4e6}.training-event.is-finished .training-attendance-open,.training-event.is-finished .training-admin-actions{opacity:1}</style>
+.home-attendance-open{border:1px solid var(--line);background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:9px 11px;min-height:44px;font-size:13px;font-weight:850;white-space:nowrap}.home-attendance-open:not(:disabled){color:var(--accent)}.attendance-heading #homeMemberCount{line-height:1.1}.home-attendance-open:disabled{opacity:.8}@media(max-width:380px){.attendance-heading h2{font-size:15px}.home-attendance-open{padding:8px;font-size:12px}}.training-top-actions{display:flex;align-items:center;gap:9px}.training-edit-trigger{width:46px;height:46px;display:grid;place-items:center;border-radius:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:21px;box-shadow:var(--shadow)}.training-edit-trigger.active{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}@media(max-width:360px){.training-top-actions{gap:7px}.training-edit-trigger{width:43px;height:43px}}.training-event.is-finished{opacity:.5;filter:saturate(.5)}.training-event.is-finished .training-vote{cursor:not-allowed;pointer-events:none}.training-finished-note{margin:0 0 12px;font-size:12px;font-weight:750;color:#bad4e6}.training-event.is-finished .training-attendance-open,.training-event.is-finished .training-admin-actions{opacity:1}
+#resultModal.training-modal-overlay{inset:0;padding:0;background:#04162e;z-index:120;align-items:stretch;justify-content:stretch}
+#resultModal .result-fullscreen{width:100%;max-width:none;height:100vh;height:100dvh;max-height:none;margin:0;border:0;border-radius:0;box-shadow:none;background:linear-gradient(160deg,#04182e,#082b4b);color:#fff;padding:0 max(16px,env(safe-area-inset-right)) max(22px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));overflow-y:auto}
+#resultModal .result-form-top{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:12px;padding: max(12px,env(safe-area-inset-top)) 0 13px;background:#04182e;border-bottom:1px solid #244662}
+#resultModal .result-form-top h2{margin:0;color:#fff;font-size:22px}
+#resultModal .result-back{width:45px;height:45px;background:transparent;color:#fff;border:0;font-size:38px;line-height:1}
+#resultModal form{width:min(100%,700px);margin:0 auto;padding-bottom:35px}
+#resultModal .field{color:#e8f4ff;font-size:13px}
+#resultModal .field input,#resultModal .field select,#resultModal .field textarea{background:#082a49;color:#fff;border:1px solid #4c85ae;border-radius:12px;min-height:46px;font-size:16px;width:100%;padding:11px}
+#resultModal .field textarea{resize:vertical;min-height:75px}
+#resultModal .result-type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:17px 0}
+#resultModal .result-type-option{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:70px;border-radius:15px;border:1px solid #416b90;background:#0b2c4a;color:#eaf5ff;font-weight:750}
+#resultModal .result-type-option.selected{background:linear-gradient(135deg,#08bef3,#0852d5);border-color:#6be4ff}
+#resultModal .result-form-section{margin:21px 0 9px;font-size:16px;font-weight:850;color:#fff}
+#resultModal .result-section-desc{display:block;font-size:12px;color:#bdd2e8;font-weight:450;margin-top:5px}
+#resultModal .result-players-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:12px}
+#resultModal .result-players-grid .field{min-width:0}
+#resultModal .result-point-row{display:grid;grid-template-columns:60px minmax(0,1fr) 13px minmax(0,1fr) 32px;align-items:center;gap:9px;margin:10px 0}
+#resultModal .result-point-label{font-size:13px;font-weight:750}
+#resultModal .result-point-input{height:49px;width:100%;min-width:0;text-align:center;border-radius:12px;border:1px solid #477ba7;background:#082a49;color:#fff;font-size:19px;font-weight:800}
+#resultModal .result-point-colon{text-align:center;font-weight:850;font-size:23px}
+#resultModal .result-remove-set{border:0;color:#fff;background:transparent;font-size:22px;min-width:30px;height:40px}
+#resultModal .result-add-set{width:100%;margin:11px 0 17px;min-height:46px;border:1px dashed #6ab7e1;border-radius:11px;background:#0a2b48;color:white;font-size:14px;font-weight:750}
+#resultModal .result-preview{padding:15px;border:1px solid #597d9c;background:#06293e;border-radius:14px;line-height:1.6;color:#d2e5f7;font-size:14px;font-weight:700}
+#resultModal .result-preview.result-has-winner{background:#063b31;border-color:#27eaa4;color:#e3fff2}
+#resultModal .result-submit{margin-top:25px;background:linear-gradient(110deg,#0bbcf1,#0658e2);color:white;font-size:16px;min-height:54px}
+@media(max-width:360px){#resultModal .result-players-grid{grid-template-columns:1fr}#resultModal .result-point-row{grid-template-columns:49px minmax(0,1fr) 9px minmax(0,1fr) 25px;gap:5px}}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -241,20 +268,30 @@ body.modal-open{overflow:hidden}
 <div class="results-header"><h2>🏆 Rezultati</h2><button type="button" id="openResultModal" class="training-add-trigger hidden" title="Dodaj rezultat" aria-label="Dodaj rezultat">＋</button></div>
 <div id="resultsList" aria-live="polite"><div class="hint">Učitavanje rezultata…</div></div>
 <div class="training-modal-overlay hidden" id="resultModal" aria-hidden="true">
-<div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
-<div class="training-modal-head"><h2 id="resultModalTitle">🏸 Dodaj rezultat</h2><button type="button" class="training-modal-close" id="closeResultModal" aria-label="Zatvori">×</button></div>
+<div class="training-modal result-fullscreen" role="dialog" aria-modal="true" aria-labelledby="resultModalTitle">
+<div class="result-form-top"><button type="button" id="closeResultModal" class="result-back" aria-label="Zatvori unos rezultata">‹</button><h2 id="resultModalTitle">Dodaj rezultat</h2></div>
 <form id="resultForm">
-<label class="field">Datum meča<input id="resultDate" type="date" required></label>
-<label class="field">Vrsta meča<select id="resultType"><option value="singles">Pojedinačno (1 na 1)</option><option value="doubles">Parovi (2 na 2)</option></select></label>
-<div class="result-team-label">Tim A</div>
-<label class="field">Igrač 1<select class="result-player" id="resultA1" required></select></label>
-<label class="field result-extra hidden" id="resultA2Field">Igrač 2<select class="result-player" id="resultA2"></select></label>
-<div class="result-team-label">Tim B</div>
-<label class="field">Igrač 1<select class="result-player" id="resultB1" required></select></label>
-<label class="field result-extra hidden" id="resultB2Field">Igrač 2<select class="result-player" id="resultB2"></select></label>
-<div class="result-team-label">Rezultat u setovima</div>
-<div class="result-set-row"><label class="field">Tim A<select id="resultSetsA"><option value="2">2</option><option value="1">1</option><option value="0">0</option></select></label><span aria-hidden="true">:</span><label class="field">Tim B<select id="resultSetsB"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label></div>
-<button type="submit" class="button full" id="resultSave">Spremi rezultat</button>
+<div class="result-type-toggle" role="group" aria-label="Vrsta meča">
+ <button type="button" class="result-type-option selected" data-match-type="singles" aria-pressed="true">🏸<span>Pojedinačni meč</span></button>
+ <button type="button" class="result-type-option" data-match-type="doubles" aria-pressed="false">🏸🏸<span>Parski meč</span></button>
+</div>
+<input id="resultType" type="hidden" value="singles">
+<label class="field">📅 Datum treninga
+<select id="resultTraining"><option value="">Odaberi trening ili vlastiti datum</option></select></label>
+<label class="field" id="resultDateField">Datum meča<input id="resultDate" type="date" required></label>
+<div class="result-form-section">👥 Igrači</div>
+<div class="result-players-grid">
+ <label class="field">Tim A · Igrač 1<select id="resultA1" required></select></label>
+ <label class="field">Tim B · Igrač 1<select id="resultB1" required></select></label>
+ <label class="field result-extra hidden" id="resultA2Field">Tim A · Igrač 2<select id="resultA2"></select></label>
+ <label class="field result-extra hidden" id="resultB2Field">Tim B · Igrač 2<select id="resultB2"></select></label>
+</div>
+<div class="result-form-section">🏆 Rezultat meča <span class="result-section-desc">Unesi bodove po setovima</span></div>
+<div id="resultSetRows"></div>
+<button type="button" class="result-add-set" id="resultAddSet">＋ Dodaj 3. set</button>
+<div id="resultPreview" class="result-preview" aria-live="polite">Unesi bodove za izračun pobjednika.</div>
+<label class="field">💬 Bilješka (opcionalno)<textarea id="resultNote" maxlength="300" placeholder="Npr. Dobar meč! 💪" rows="3"></textarea></label>
+<button type="submit" class="button full result-submit" id="resultSave">✓ Spremi rezultat</button>
 <p id="resultFeedback" class="muted" role="status" aria-live="polite"></p>
 </form></div></div></section>
 <section class="section" id="screen-players"><div class="card"><h2>👥 Igrači</h2><p class="muted">Ovdje su članovi koje je u ligu dodao administrator, uključujući one bez aplikacije.</p><p id="playersCount" class="player-count" aria-live="polite">Učitavanje popisa…</p><div id="playersList" class="player-list"></div></div><div class="card hidden" id="editPlayerCard"><h2>✏️ Uredi igrača</h2><form id="editPlayerForm"><label class="field">Ime i prezime<input id="editPlayerName" maxlength="80" required autocomplete="off"></label><div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div><div class="card hidden" id="playersAdmin"><h2>➕ Dodaj igrača</h2><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Povezivanje s Google računom dodat ćemo naknadno.</p></div></section>
@@ -621,27 +658,77 @@ function renderTrainings(run){
 function populateResultPlayers(){
  const players=playersCache.filter(p=>p.active===true).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'hr'));
  for(const id of ['resultA1','resultA2','resultB1','resultB2']){
-  const select=$(id),old=select.value;
-  select.replaceChildren(new Option('Odaberi igrača',''));
+  const select=$(id),previous=select.value;select.replaceChildren(new Option('Odaberi igrača',''));
   for(const p of players)select.add(new Option(p.name||'Igrač',p.id));
-  if(players.some(p=>p.id===old))select.value=old;
+  if(players.some(p=>p.id===previous))select.value=previous;
  }
 }
-function resultTypeChanged(){
- const double=$('resultType').value==='doubles';
- for(const id of ['resultA2Field','resultB2Field'])show(id,double);
- for(const id of ['resultA2','resultB2'])$(id).required=double;
+function populateResultTrainings(){
+ const select=$('resultTraining'),old=select.value;
+ select.replaceChildren(new Option('Vlastiti datum',''));
+ const trainings=[...trainingCache].sort((a,b)=>String(b.date+' '+b.start).localeCompare(String(a.date+' '+a.start)));
+ for(const t of trainings)select.add(new Option(formatTrainingDate(t.date)+' · '+t.start+' – '+t.end,t.id));
+ if(trainings.some(t=>t.id===old))select.value=old;
 }
-$('resultType').addEventListener('change',resultTypeChanged);
+function resultTypeChanged(){
+ const doubles=$('resultType').value==='doubles';
+ for(const id of ['resultA2Field','resultB2Field'])show(id,doubles);
+ for(const id of ['resultA2','resultB2'])$(id).required=doubles;
+ document.querySelectorAll('.result-type-option').forEach(btn=>{
+  const active=btn.dataset.matchType===$('resultType').value;
+  btn.classList.toggle('selected',active);btn.setAttribute('aria-pressed',String(active));
+ });
+ updateResultPreview();
+}
+document.querySelectorAll('.result-type-option').forEach(btn=>btn.addEventListener('click',()=>{$('resultType').value=btn.dataset.matchType;resultTypeChanged()}));
+$('resultTraining').addEventListener('change',()=>{
+ const t=trainingCache.find(x=>x.id===$('resultTraining').value);
+ if(t)$('resultDate').value=t.date;
+ $('resultDateField').classList.toggle('hidden',!!t);
+});
+function buildResultSet(number,a='',b=''){
+ const row=node('div','result-point-row');row.dataset.set=String(number);
+ const label=node('span','result-point-label',number+'. set');
+ const inputA=node('input','result-point-input');inputA.type='number';inputA.min='0';inputA.max='99';inputA.step='1';inputA.inputMode='numeric';inputA.placeholder='0';inputA.value=a;inputA.required=true;inputA.setAttribute('aria-label','Bodovi tima A u '+number+'. setu');
+ const inputB=node('input','result-point-input');inputB.type='number';inputB.min='0';inputB.max='99';inputB.step='1';inputB.inputMode='numeric';inputB.placeholder='0';inputB.value=b;inputB.required=true;inputB.setAttribute('aria-label','Bodovi tima B u '+number+'. setu');
+ const colon=node('span','result-point-colon',':');
+ row.append(label,inputA,colon,inputB);
+ if(number===3){const remove=node('button','result-remove-set','✕');remove.type='button';remove.setAttribute('aria-label','Ukloni 3. set');remove.addEventListener('click',()=>{row.remove();show('resultAddSet',true);updateResultPreview()});row.append(remove)}
+ else row.append(node('span','result-row-spacer',''));
+ for(const input of [inputA,inputB])input.addEventListener('input',updateResultPreview);
+ return row;
+}
+function getResultSets(){
+ return Array.from($('resultSetRows').querySelectorAll('.result-point-row')).map(row=>{
+  const fields=row.querySelectorAll('input');
+  return {a:fields[0].value===''?null:Number(fields[0].value),b:fields[1].value===''?null:Number(fields[1].value)};
+ });
+}
+function resultSetOutcome(sets){
+ if(sets.length<2||sets.length>3||sets.some(({a,b})=>!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>99||b>99||a===b))return null;
+ let winsA=0,winsB=0;
+ for(const set of sets){if(set.a>set.b)winsA++;else winsB++}
+ if(Math.max(winsA,winsB)!==2||Math.min(winsA,winsB)!==sets.length-2)return null;
+ if(sets.length===3&&((sets[0].a>sets[0].b)===(sets[1].a>sets[1].b)))return null;
+ return {winsA,winsB,winner:winsA===2?'A':'B'};
+}
+function updateResultPreview(){
+ const sets=getResultSets(),outcome=resultSetOutcome(sets),box=$('resultPreview');
+ box.classList.toggle('result-has-winner',!!outcome);
+ if(outcome)box.textContent='🏆 Pobjeda tima '+outcome.winner+'  '+outcome.winsA+' : '+outcome.winsB+'  ('+sets.map(x=>x.a+':'+x.b).join(', ')+')';
+ else box.textContent='Unesi dva seta (svaki ima pobjednika). Za rezultat 2:1 dodaj treći set.';
+}
+$('resultAddSet').addEventListener('click',()=>{$('resultSetRows').append(buildResultSet(3));show('resultAddSet',false);updateResultPreview()});
 $('homeAddResult').addEventListener('click',()=>{navigate('results');if(['owner','admin'].includes(currentRole))openResultModal()});
 function openResultModal(){
  if(!['owner','admin'].includes(currentRole))return;
  resultModalReturnFocus=document.activeElement;
- $('resultForm').reset();$('resultFeedback').textContent='';
+ $('resultForm').reset();$('resultFeedback').textContent='';$('resultType').value='singles';
  const today=new Date();$('resultDate').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
- resultTypeChanged();populateResultPlayers();
+ $('resultSetRows').replaceChildren(buildResultSet(1),buildResultSet(2));show('resultAddSet',true);
+ populateResultTrainings();populateResultPlayers();resultTypeChanged();$('resultDateField').classList.remove('hidden');
  show('resultModal',true);$('resultModal').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
- $('resultDate').focus();
+ $('closeResultModal').focus();
 }
 function closeResultModal(){
  show('resultModal',false);$('resultModal').setAttribute('aria-hidden','true');
@@ -651,12 +738,11 @@ function closeResultModal(){
 }
 $('openResultModal').addEventListener('click',openResultModal);
 $('closeResultModal').addEventListener('click',closeResultModal);
-$('resultModal').addEventListener('click',e=>{if(e.target===$('resultModal'))closeResultModal()});
 document.addEventListener('keydown',e=>{
  if($('resultModal').classList.contains('hidden'))return;
  if(e.key==='Escape'){e.preventDefault();closeResultModal()}
  if(e.key==='Tab'){
-  const items=Array.from($('resultModal').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled)')).filter(n=>n.offsetParent!==null);
+  const items=Array.from($('resultModal').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled),textarea:not(:disabled)')).filter(n=>n.offsetParent!==null);
   if(!items.length)return;
   if(e.shiftKey&&document.activeElement===items[0]){e.preventDefault();items[items.length-1].focus()}
   else if(!e.shiftKey&&document.activeElement===items[items.length-1]){e.preventDefault();items[0].focus()}
@@ -667,18 +753,20 @@ $('resultForm').addEventListener('submit',async e=>{
  const msg=$('resultFeedback'),save=$('resultSave');
  if(!['owner','admin'].includes(currentRole)){msg.textContent='Samo vlasnik ili administrator može dodavati rezultate.';return}
  const type=$('resultType').value;
- const idsA=[ $('resultA1').value, ...(type==='doubles'?[$('resultA2').value]:[]) ];
- const idsB=[ $('resultB1').value, ...(type==='doubles'?[$('resultB2').value]:[]) ];
+ const idsA=[$('resultA1').value,...(type==='doubles'?[$('resultA2').value]:[])];
+ const idsB=[$('resultB1').value,...(type==='doubles'?[$('resultB2').value]:[])];
  const ids=[...idsA,...idsB];
  if(ids.some(id=>!id)||new Set(ids).size!==ids.length){msg.textContent='Odaberi različite igrače za oba tima.';return}
- const players=ids.map(id=>playersCache.find(p=>p.id===id&&p.active===true));
- if(players.some(p=>!p)){msg.textContent='Jedan igrač nije više aktivan. Osvježi popis.';return}
- const setsA=Number($('resultSetsA').value),setsB=Number($('resultSetsB').value);
- if(!((setsA===2&&setsB<=1)||(setsB===2&&setsA<=1))){msg.textContent='Pobjednik mora imati 2 seta, a drugi tim 0 ili 1.';return}
- const date=$('resultDate').value;
- if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg.textContent='Odaberi datum meča.';return}
+ if(ids.some(id=>!playersCache.some(p=>p.id===id&&p.active===true))){msg.textContent='Jedan od igrača više nije aktivan.';return}
+ const sets=getResultSets(),outcome=resultSetOutcome(sets);
+ if(!outcome){msg.textContent='Provjeri rezultat: pobjednik mora osvojiti 2 seta, a u svakom setu bodovi moraju biti različiti.';return}
+ const training=trainingCache.find(t=>t.id===$('resultTraining').value);
+ const date=training?.date||$('resultDate').value;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg.textContent='Odaberi valjani datum.';return}
  const getName=id=>playersCache.find(p=>p.id===id)?.name||'Igrač';
- const record={date,type,teamA:idsA,teamB:idsB,teamANames:idsA.map(getName),teamBNames:idsB.map(getName),setsA,setsB,createdBy:auth.currentUser.uid,createdAt:serverTimestamp()};
+ const record={date,type,teamA:idsA,teamB:idsB,teamANames:idsA.map(getName),teamBNames:idsB.map(getName),
+  setsA:outcome.winsA,setsB:outcome.winsB,pointSets:sets,note:$('resultNote').value.trim(),createdBy:auth.currentUser.uid,createdAt:serverTimestamp()};
+ if(training)record.trainingId=training.id;
  save.disabled=true;msg.textContent='Spremanje…';
  try{await addDoc(collection(db,'results'),record);closeResultModal();notify('✅ Rezultat je spremljen.')}
  catch(error){msg.textContent=readableError(error)}finally{save.disabled=false}
