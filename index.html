@@ -539,7 +539,7 @@ function openResultModal(){
  if(!['owner','admin'].includes(currentRole))return;
  resultModalReturnFocus=document.activeElement;
  $('resultForm').reset();$('resultFeedback').textContent='';
- $('resultDate').value=new Date().toLocaleDateString('en-CA');
+ const today=new Date();$('resultDate').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
  resultTypeChanged();populateResultPlayers();
  show('resultModal',true);$('resultModal').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');
  $('resultDate').focus();
