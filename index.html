@@ -344,10 +344,17 @@ document.addEventListener('keydown',e=>{
 });
 function buildAttendanceRows(votes){
  const activePlayers=playersCache.filter(p=>p.active===true).sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'hr'));
- const rows=activePlayers.map(p=>({player:p,choice:votes.find(v=>v.id===p.linkedUid)?.choice||null}));
+ const valid=votes.filter(v=>['yes','no','maybe'].includes(v.choice));
+ const rows=activePlayers.map(p=>({name:String(p.name||'Igrač'),choice:valid.find(v=>v.id===p.linkedUid)?.choice||null,linked:!!p.linkedUid}));
+ // Google voters without a linked player profile are shown separately, not falsely matched by name.
+ for(const vote of valid){
+  if(activePlayers.some(p=>p.linkedUid===vote.id))continue;
+  const name=typeof vote.displayName==='string'&&vote.displayName.trim()?vote.displayName.trim():'Google korisnik';
+  rows.push({name,choice:vote.choice,google:true});
+ }
  const counts={yes:rows.filter(r=>r.choice==='yes').length,no:rows.filter(r=>r.choice==='no').length,maybe:rows.filter(r=>r.choice==='maybe').length};
- counts.pending=activePlayers.length-counts.yes-counts.no-counts.maybe;
- return {rows,counts,activePlayers};
+ counts.pending=rows.filter(r=>!['yes','no','maybe'].includes(r.choice)).length;
+ return {rows,counts,activePlayers,validVoteCount:valid.length};
 }
 function renderAttendanceModal(){
  if(!openAttendanceTrainingId)return;
@@ -360,17 +367,16 @@ function renderAttendanceModal(){
  if(data.error){body.append(node('p','attendance-note',data.error));return}
  const votes=data.votes||[],{rows,counts,activePlayers}=buildAttendanceRows(votes);
  const filters=node('div','attendance-filters');
- const entries=[['all','Svi',activePlayers.length],['yes','Dolaze',counts.yes],['no','Ne dolaze',counts.no],['maybe','Možda',counts.maybe],['pending','Bez odgovora',counts.pending]];
+ const entries=[['all','Svi',rows.length],['yes','Dolaze',counts.yes],['no','Ne dolaze',counts.no],['maybe','Možda',counts.maybe],['pending','Bez odgovora',counts.pending]];
  const list=node('div','attendance-player-list');
  function fill(){
   list.replaceChildren();
   const selected=rows.filter(r=>trainingAttendanceFilter==='all'||(trainingAttendanceFilter==='pending'?!['yes','no','maybe'].includes(r.choice):r.choice===trainingAttendanceFilter));
   if(!selected.length){list.append(node('p','attendance-empty','Nema igrača u ovoj skupini.'));return}
-  for(const {player,choice} of selected){
+  for(const {name,choice,google} of selected){
    const row=node('div','attendance-player-row'),left=node('div','attendance-player-left');
-   const name=String(player.name||'Igrač').trim();
    const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
-   left.append(node('span','attendance-avatar',initials),node('span','attendance-player-name',name));
+   left.append(node('span','attendance-avatar',initials),node('span','attendance-player-name',name+(google?' · Google':'')));
    const status=choice==='yes'?['✓ Dolazi','yes']:choice==='no'?['✕ Ne dolazi','no']:choice==='maybe'?['? Možda','maybe']:['— Bez odgovora','pending'];
    row.append(left,node('span','attendance-state '+status[1],status[0]));list.append(row);
   }
@@ -386,7 +392,7 @@ function renderAttendanceModal(){
  }
  body.append(filters,list);
  const unlinked=votes.filter(v=>['yes','no','maybe'].includes(v.choice)&&!activePlayers.some(p=>p.linkedUid===v.id)).length;
- if(unlinked)body.append(node('p','attendance-note','ℹ️ '+unlinked+' odgovor(a) Google korisnika nije povezano s profilima igrača.'));
+ if(unlinked)body.append(node('p','attendance-note','ℹ️ Google prijave bez povezanog profila prikazuju se zasebno. Ne spajamo igrače samo prema imenu.'));
  if(!activePlayers.length)body.append(node('p','attendance-note','Popis je prazan. Administrator može dodati igrače na stranici Igrači.'));
  fill();
 }
@@ -427,7 +433,7 @@ function renderTrainings(run){
     button.addEventListener('click',async()=>{
      if(!auth.currentUser)return;
      responses.querySelectorAll('button').forEach(b=>b.disabled=true);
-     try{await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),{choice:value,updatedAt:serverTimestamp()})}
+     try{const token=await auth.currentUser.getIdTokenResult();const googleName=typeof token.claims.name==='string'?token.claims.name.trim():'';const vote={choice:value,updatedAt:serverTimestamp()};if(googleName)vote.displayName=googleName;await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),vote)}
      catch(error){notify(readableError(error),true)}
      finally{responses.querySelectorAll('button').forEach(b=>b.disabled=false)}
     });responses.append(button);
@@ -444,9 +450,9 @@ function renderTrainings(run){
    if(run!==generation)return;
    const votes=snapshot.docs.map(d=>({id:d.id,...d.data()}));
    trainingVoteData[t.id]={votes};
-   const {counts,activePlayers}=buildAttendanceRows(votes);
-   count.textContent='👥 '+(counts.yes+counts.no+counts.maybe)+' / '+activePlayers.length;
-   count.title='Otvori dolaznost i popis igrača';
+   const {activePlayers,validVoteCount}=buildAttendanceRows(votes);
+   count.textContent='👥 '+validVoteCount+' / '+activePlayers.length;
+   count.title='Otvori popis prijavljenih Google korisnika i igrača';
    const mine=votes.find(v=>v.id===auth.currentUser?.uid);
    responses.querySelectorAll('button').forEach(b=>{const checked=b.dataset.choice===mine?.choice;b.classList.toggle('selected',checked);b.setAttribute('aria-pressed',String(checked))});
    if(openAttendanceTrainingId===t.id)renderAttendanceModal();
