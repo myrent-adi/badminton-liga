@@ -112,17 +112,26 @@ service cloud.firestore {
         allow delete: if false;
       }
     }
-    // Results are shared with approved members. Only admins may add results.
+    // Approved members can see results; only admins can submit complete match scores.
+    function validPointSet(setScore) {
+      return setScore is map
+        && setScore.keys().hasOnly(['a', 'b'])
+        && setScore.keys().hasAll(['a', 'b'])
+        && setScore.a is int && setScore.b is int
+        && setScore.a >= 0 && setScore.a <= 99
+        && setScore.b >= 0 && setScore.b <= 99
+        && setScore.a != setScore.b;
+    }
     match /results/{resultId} {
       allow get, list: if isMember();
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
-          'setsA', 'setsB', 'createdBy', 'createdAt'
+          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'createdBy', 'createdAt'
         ])
         && request.resource.data.keys().hasAll([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
-          'setsA', 'setsB', 'createdBy', 'createdAt'
+          'setsA', 'setsB', 'pointSets', 'note', 'createdBy', 'createdAt'
         ])
         && request.resource.data.date is string
         && request.resource.data.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
@@ -149,15 +158,55 @@ service cloud.firestore {
           && request.resource.data.teamANames[1].size() <= 80
           && request.resource.data.teamBNames[1].size() <= 80
         ))
-        && request.resource.data.teamA.hasOnly(request.resource.data.teamA)
         && request.resource.data.teamA.toSet().intersection(request.resource.data.teamB.toSet()).size() == 0
         && request.resource.data.teamA.toSet().size() == request.resource.data.teamA.size()
         && request.resource.data.teamB.toSet().size() == request.resource.data.teamB.size()
         && request.resource.data.setsA is int
         && request.resource.data.setsB is int
+        && request.resource.data.pointSets is list
+        && request.resource.data.pointSets.size() >= 2
+        && request.resource.data.pointSets.size() <= 3
+        && validPointSet(request.resource.data.pointSets[0])
+        && validPointSet(request.resource.data.pointSets[1])
+        && (request.resource.data.pointSets.size() == 2
+            || validPointSet(request.resource.data.pointSets[2]))
+        && (request.resource.data.setsA == 2 || request.resource.data.setsB == 2)
+        && request.resource.data.setsA + request.resource.data.setsB == request.resource.data.pointSets.size()
+        && request.resource.data.setsA <= 2
+        && request.resource.data.setsB <= 2
         && (
-          (request.resource.data.setsA == 2 && request.resource.data.setsB in [0, 1])
-          || (request.resource.data.setsB == 2 && request.resource.data.setsA in [0, 1])
+          (request.resource.data.pointSets.size() == 2
+            && (
+              (request.resource.data.setsA == 2
+                && request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
+                && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
+              || (request.resource.data.setsB == 2
+                && request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
+                && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
+            ))
+          || (request.resource.data.pointSets.size() == 3
+            && (
+              (request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
+                && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
+              || (request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
+                && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
+            )
+            && (
+              (request.resource.data.setsA == 2
+                && request.resource.data.pointSets[2].a > request.resource.data.pointSets[2].b)
+              || (request.resource.data.setsB == 2
+                && request.resource.data.pointSets[2].a < request.resource.data.pointSets[2].b)
+            ))
+        )
+        && request.resource.data.note is string
+        && request.resource.data.note.size() <= 300
+        && (
+          !request.resource.data.keys().hasAny(['trainingId'])
+          || (
+            request.resource.data.trainingId is string
+            && exists(/databases/$(database)/documents/trainings/$(request.resource.data.trainingId))
+            && get(/databases/$(database)/documents/trainings/$(request.resource.data.trainingId)).data.date == request.resource.data.date
+          )
         )
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time;
