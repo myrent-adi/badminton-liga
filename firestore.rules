@@ -69,27 +69,21 @@ service cloud.firestore {
         && request.resource.data.active is bool;
       allow delete: if false;
     }
-    // Training dates are entered by owners/admins. No venue or year navigation required in the UI.
+    // Only owner and admins can manage sessions. Approved members can read.
     match /trainings/{trainingId} {
       allow get, list: if isMember();
       allow create: if isAdmin()
         && request.resource.data.keys().hasOnly(['date', 'start', 'end', 'active', 'createdBy', 'createdAt'])
         && request.resource.data.keys().hasAll(['date', 'start', 'end', 'active', 'createdBy', 'createdAt'])
         && request.resource.data.date is string
-        && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}
-  }
-}
-)
+        && request.resource.data.date.size() == 10
+        && request.resource.data.date.matches('[0-9]{4}-[0-9]{2}-[0-9]{2}')
         && request.resource.data.start is string
-        && request.resource.data.start.matches('^[0-9]{2}:[0-9]{2}
-  }
-}
-)
+        && request.resource.data.start.size() == 5
+        && request.resource.data.start.matches('[0-9]{2}:[0-9]{2}')
         && request.resource.data.end is string
-        && request.resource.data.end.matches('^[0-9]{2}:[0-9]{2}
-  }
-}
-)
+        && request.resource.data.end.size() == 5
+        && request.resource.data.end.matches('[0-9]{2}:[0-9]{2}')
         && request.resource.data.active == true
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time;
