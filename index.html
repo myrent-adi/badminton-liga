@@ -205,7 +205,62 @@ body.modal-open{overflow:hidden}
 #resultModal .result-preview.result-has-winner{background:#063b31;border-color:#27eaa4;color:#e3fff2}
 #resultModal .result-submit{margin-top:25px;background:linear-gradient(110deg,#0bbcf1,#0658e2);color:white;font-size:16px;min-height:54px}
 @media(max-width:360px){#resultModal .result-players-grid{grid-template-columns:1fr}#resultModal .result-point-row{grid-template-columns:49px minmax(0,1fr) 9px minmax(0,1fr) 25px;gap:5px}}
-.result-point-detail{font-size:12px;color:#bbd9f0;margin-top:10px;text-align:center}.result-card-note{font-size:13px;color:#d6edfa;margin:10px 0 0;overflow-wrap:anywhere}body.result-screen-open #bottomNav{display:none!important}body.result-screen-open #resultModal{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:1000}body.result-screen-open #resultModal .result-fullscreen{min-height:100vh;min-height:100dvh;height:100vh;height:100dvh}</style>
+.result-point-detail{font-size:12px;color:#bbd9f0;margin-top:10px;text-align:center}.result-card-note{font-size:13px;color:#d6edfa;margin:10px 0 0;overflow-wrap:anywhere}body.result-screen-open #bottomNav{display:none!important}body.result-screen-open #resultModal{position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;z-index:1000}body.result-screen-open #resultModal .result-fullscreen{min-height:100vh;min-height:100dvh;height:100vh;height:100dvh}
+/* Consistent light appearance for training, results, attendance and result editor. */
+@media (prefers-color-scheme:light){
+ .next-training-card{background:linear-gradient(135deg,#ffffff,#ecf6ff);border:1px solid #afd1f2;color:#112942;box-shadow:var(--shadow)}
+ .next-training-card .eyeline{color:#456c91}
+ .next-training-card .muted{color:#547089}
+ .training-event{background:linear-gradient(145deg,#ffffff,#f2f8ff);border:1px solid #b6d5ef;color:#132940;box-shadow:var(--shadow)}
+ .training-event-head strong{color:#10253c}
+ .training-time{color:#506b86}
+ .training-attendees{color:#0960aa}
+ .training-attendance-open{background:#e8f3ff;color:#07549c;border:1px solid #b8d8f5}
+ .training-vote{background:#eef5fd;color:#163958;border:1px solid #c6dbee}
+ .training-vote.selected{background:#d9f0ff;color:#07558a;border-color:#0789d8;box-shadow:inset 0 0 0 1px #0789d8}
+ .training-admin-actions{border-top-color:#cbdff2}
+ .training-event.is-cancelled{background:linear-gradient(145deg,#f3f5f9,#e9eef5);border-color:#c0cbd7;color:#526174}
+ .training-cancel-note{color:#a73547}
+ .training-finished-note{color:#516f86}
+ .result-card{background:linear-gradient(145deg,#ffffff,#eff7ff);border:1px solid #b6d5ef;color:#122943;box-shadow:var(--shadow)}
+ .result-meta{color:#627d99}
+ .result-team{color:#203953}
+ .result-team.winning{color:#087349}
+ .result-points{color:#087f50}
+ .result-point-detail{color:#53718e}
+ .result-card-note{color:#4d6680}
+ .attendance-player-list{border-color:#cadced}
+ .attendance-player-row{background:#ffffff;border-bottom-color:#d7e6f4}
+ .attendance-player-name{color:#152e47}
+ .attendance-state.yes{color:#087e4d}
+ .attendance-state.no{color:#b72e42}
+ .attendance-state.maybe{color:#805c0b}
+ .attendance-state.pending{color:#60778b}
+ .attendance-filters .attendance-filter{background:#edf5fd;border:1px solid #c7dcee;color:#20496c}
+ .attendance-filters .attendance-filter.active{background:#086bd3;border-color:#086bd3;color:#ffffff}
+ .attendance-empty{color:#526b82}
+ .attendance-note{color:#54708b}
+ #resultModal.training-modal-overlay{background:#f2f6fc}
+ #resultModal .result-fullscreen{background:linear-gradient(170deg,#f9fcff,#eef5fc);color:#142b43}
+ #resultModal .result-form-top{background:#f9fcff;border-bottom-color:#d4e3f2}
+ #resultModal .result-form-top h2{color:#132a43}
+ #resultModal .result-back{color:#15395c}
+ #resultModal .field{color:#213d5b}
+ #resultModal .field input,#resultModal .field select,#resultModal .field textarea{background:#ffffff;color:#132f4a;border-color:#bfd6ea}
+ #resultModal .field input::placeholder,#resultModal .field textarea::placeholder{color:#73879a}
+ #resultModal .result-type-option{background:#ffffff;color:#194365;border-color:#bdd5e9}
+ #resultModal .result-type-option.selected{background:linear-gradient(135deg,#0ea8ed,#0864d8);color:#ffffff;border-color:#078ee0}
+ #resultModal .result-form-section{color:#183550}
+ #resultModal .result-section-desc{color:#58748d}
+ #resultModal .result-point-input{background:#ffffff;color:#173550;border-color:#b4d0e5}
+ #resultModal .result-point-colon{color:#183b58}
+ #resultModal .result-remove-set{color:#b43d4d}
+ #resultModal .result-add-set{background:#e9f3ff;color:#155d9f;border-color:#83b9e0}
+ #resultModal .result-preview{background:#ffffff;color:#506881;border-color:#b8d0e4}
+ #resultModal .result-preview.result-has-winner{background:#e3f9ef;color:#096541;border-color:#3ab77d}
+ #resultModal .result-submit{color:#ffffff}
+}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
