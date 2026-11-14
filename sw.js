@@ -1,5 +1,5 @@
-const CACHE='silent-zagreb-ui-v1-20261114';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./icons/icon-192.png','./icons/icon-512.png','./assets/silent-zagreb-logo.jpg'];
+const CACHE='silent-zagreb-logo-v2-20261114';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./icons/silent-logo-192.png','./icons/silent-logo-512.png','./icons/apple-touch-icon.png','./icons/silent-maskable-512.png','./assets/silent-zagreb-logo.jpg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
 self.addEventListener('fetch',event=>{if(event.request.method!=='GET')return;const url=new URL(event.request.url);if(url.origin!==location.origin)return;if(event.request.mode==='navigate'){event.respondWith(fetch(event.request).then(response=>{const copy=response.clone();caches.open(CACHE).then(cache=>cache.put(event.request,copy));return response}).catch(()=>caches.match('./index.html')));return;}event.respondWith(caches.match(event.request).then(hit=>hit||fetch(event.request)))});
