@@ -692,7 +692,6 @@ $('editPlayerForm').addEventListener('submit',async event=>{
   const name=normalizedPlayerName($('editPlayerName').value);
   if(name.length<2||name.length>80){feedback.textContent='Upiši ime od 2 do 80 znakova.';return}
   if(playerNameExists(name,editingPlayerId)){feedback.textContent='Igrač s tim imenom već postoji.';return}
-  button.disabled=true;feedback.textContent='Spremanje…';
   const linkedUid=$('editPlayerGoogle').value;
   if(linkedUid&&playersCache.some(p=>p.id!==editingPlayerId&&p.linkedUid===linkedUid)){feedback.textContent='Taj Google račun već je povezan s drugim igračem.';return}
   if(linkedUid&&!approvedPlayersGoogle.some(u=>u.uid===linkedUid)&&linkedUid!==auth.currentUser?.uid){feedback.textContent='Odaberi odobreni Google račun.';return}
@@ -700,6 +699,7 @@ $('editPlayerForm').addEventListener('submit',async event=>{
   if(!player){feedback.textContent='Igrač nije pronađen.';return}
   const changes={name};
   if(linkedUid!==String(player.linkedUid||''))changes.linkedUid=linkedUid||deleteField();
+  button.disabled=true;feedback.textContent='Spremanje…';
   try{await updateDoc(doc(db,'players',editingPlayerId),changes);finishEditPlayer();notify('✅ Profil igrača je ažuriran.')}
   catch(error){feedback.textContent=readableError(error)}
   finally{button.disabled=false}
@@ -1246,11 +1246,11 @@ $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').tex
 try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',isAdmin);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
 const unProfile=onSnapshot(userRef,snapshot=>{if(current!==generation)return;statusView(snapshot.exists()?snapshot.data().status:'pending',role)},error=>notify(readableError(error),true));unsubscribers.push(unProfile);
 const unPlayers=onSnapshot(query(collection(db,'players')),snapshot=>{if(current!==generation)return;displayPlayers(snapshot)},error=>{if(current!==generation)return;$('playersCount').textContent=readableError(error);renderHomeAttendance()});unsubscribers.push(unPlayers);const unResults=onSnapshot(query(collection(db,'results')),snapshot=>{if(current!==generation)return;resultsCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderResults()},error=>{if(current!==generation)return;$('resultsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unResults);
-const unTrainings=onSnapshot(query(collection(db,'trainings')),snapshot=>{if(current!==generation)return;trainingCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderTrainings(current)},error=>{if(current!==generation)return;$('trainingsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unTrainings);if(isAdmin){show('admin',true);
-const unAdmins=onSnapshot(collection(db,'admins'),snapshot=>{
+const unTrainings=onSnapshot(query(collection(db,'trainings')),snapshot=>{if(current!==generation)return;trainingCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderTrainings(current)},error=>{if(current!==generation)return;$('trainingsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unTrainings);const unAdmins=onSnapshot(collection(db,'admins'),snapshot=>{
  playerAdminRoles=Object.fromEntries(snapshot.docs.map(d=>[d.id,d.data().role]));
  renderPlayers();
-},error=>notify('Uloge administratora nisu dostupne: '+readableError(error),true));unsubscribers.push(unAdmins);
+},error=>{playerAdminRoles={};renderPlayers()});unsubscribers.push(unAdmins);
+if(isAdmin){show('admin',true);
 const unUsers=onSnapshot(query(collection(db,'users')),snapshot=>{
  showAdminUsers(snapshot);
  approvedPlayersGoogle=snapshot.docs.filter(d=>d.data().status==='approved').map(d=>({uid:d.id,...d.data()}));
