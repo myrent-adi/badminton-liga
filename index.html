@@ -396,7 +396,7 @@ function renderTrainings(run){
       const row=node('div','attendance-player-row');
       const left=node('div','attendance-player-left');
       const name=String(player.name||'Igrač').trim();
-      const avatar=node('span','attendance-avatar',name.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase());
+      const avatar=node('span','attendance-avatar',name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase());
       left.append(avatar,node('span','attendance-player-name',name));
       const state=choice==='yes'?['✓ Dolazi','yes']:choice==='no'?['✕ Ne dolazi','no']:choice==='maybe'?['? Možda','maybe']:['— Bez odgovora','pending'];
       row.append(left,node('span','attendance-state '+state[1],state[0]));playerList.append(row);
