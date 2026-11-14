@@ -564,6 +564,8 @@ function closePlayerModal(){
  if(playerModalReturnFocus&&document.contains(playerModalReturnFocus))playerModalReturnFocus.focus();
  playerModalReturnFocus=null;
 }
+// Put the add-player modal above the fixed bottom navigation.
+document.body.appendChild($('playersAdmin'));
 $('openPlayerModal').addEventListener('click',openPlayerModal);
 $('closePlayerModal').addEventListener('click',closePlayerModal);
 $('playersAdmin').addEventListener('click',e=>{if(e.target===$('playersAdmin'))closePlayerModal()});
