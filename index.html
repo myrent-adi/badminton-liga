@@ -59,6 +59,7 @@ body.subpage #screen-more #accountCard{margin-top:0}
 .hero-title{padding-right:0}
 @media(max-width:480px){.hero-title{padding-right:0;padding-top:0}}
 .results-arrow{min-width:43px;min-height:40px;font-size:26px;line-height:1;padding:3px 11px;border-radius:12px;flex-shrink:0}
+.attendance-heading{align-items:center;min-height:28px}.attendance-heading h2{display:flex;align-items:center;gap:7px;margin:0;line-height:1.2;min-width:0}.attendance-heading h2 span:first-child{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}.attendance-heading #homeMemberCount{display:flex;align-items:center;justify-content:flex-end;line-height:1.2;margin:0;white-space:nowrap;flex-shrink:0}@media(max-width:360px){.attendance-heading h2{font-size:16px}.attendance-heading #homeMemberCount{font-size:12px}}
 </style>
 </head>
 <body>
@@ -94,7 +95,7 @@ body.subpage #screen-more #accountCard{margin-top:0}
 <div id="approvedArea" class="hidden">
 <section class="section active" id="screen-home">
 <div class="card next-training-card"><div class="between"><div><div class="eyeline">▣ Sljedeći trening</div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><p class="muted" style="margin:7px 0 0">Raspored će se pojaviti nakon što administrator doda prvi trening.</p></div><span class="badge">U pripremi</span></div></div>
-<div class="card"><div class="between"><h2>👥 Dolaznost na trening</h2><span class="muted" id="homeMemberCount" aria-live="polite">Učitavanje članova…</span></div><div class="stats"><div class="stat go"><b>–</b><span>Dolaze</span></div><div class="stat no"><b>–</b><span>Ne dolaze</span></div><div class="stat maybe"><b>–</b><span>Možda</span></div><div class="stat"><b>–</b><span>Bez odgovora</span></div></div><p class="muted">Podaci će se prikazati kada uključimo prijave za trening. Ne prikazujemo izmišljene dolaske.</p></div>
+<div class="card"><div class="between attendance-heading"><h2><span aria-hidden="true">👥</span><span>Dolaznost na trening</span></h2><span class="muted" id="homeMemberCount" aria-live="polite">Učitavanje članova…</span></div><div class="stats"><div class="stat go"><b>–</b><span>Dolaze</span></div><div class="stat no"><b>–</b><span>Ne dolaze</span></div><div class="stat maybe"><b>–</b><span>Možda</span></div><div class="stat"><b>–</b><span>Bez odgovora</span></div></div><p class="muted">Podaci će se prikazati kada uključimo prijave za trening. Ne prikazujemo izmišljene dolaske.</p></div>
 <div class="mini-nav" style="margin-bottom:13px"><button class="tile" data-go="results"><span class="icon">🏆</span>Rezultati</button><button class="tile" data-go="results"><span class="icon">🏸</span>Dodaj rezultat</button></div>
 <div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2><button type="button" class="button secondary results-arrow" data-go="results" aria-label="Otvori sve rezultate" title="Otvori rezultate">→</button></div><div class="hint">Još nema rezultata u Firestoreu. Prikazivat ćemo samo stvarno spremljene mečeve.</div></div>
 </section>
