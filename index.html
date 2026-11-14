@@ -115,7 +115,70 @@ body.modal-open{overflow:hidden}
 .manual-attendance-button.selected{background:#007ed6;border-color:#62d6ff}
 .attendance-player-row{flex-wrap:wrap}
 @media(max-width:410px){.manual-attendance-buttons{width:100%;margin-left:40px}}
-.results-header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 15px}.results-header h2{font-size:26px;margin:0}.result-team-label{font-size:14px;font-weight:800;margin:16px 0 4px;color:var(--ink)}.result-set-row{display:flex;align-items:center;justify-content:center;gap:15px}.result-set-row .field{flex:1}.result-set-row span{font-size:28px;font-weight:800}.result-card{border-radius:16px;border:1px solid #228ec9;background:linear-gradient(135deg,#062746,#04172c);color:#fff;margin:11px 0;padding:15px}.result-meta{font-size:12px;color:#b9dcf1;margin-bottom:12px}.result-score{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}.result-team{font-size:14px;font-weight:700;overflow-wrap:anywhere}.result-team:last-child{text-align:right}.result-team.winning{color:#5bf59e}.result-points{color:#55e790;font-size:24px;white-space:nowrap}@media(max-width:390px){.result-score{gap:5px}.result-team{font-size:12px}.result-points{font-size:20px}}.recent-result-row{display:grid;grid-template-columns:70px minmax(0,1fr) auto;align-items:center;gap:9px;padding:11px 1px;border-bottom:1px solid var(--line);font-size:13px}.recent-result-row:last-child{border:0}.recent-result-row small{color:var(--muted)}.recent-result-row span{overflow-wrap:anywhere}.recent-result-row strong{color:var(--green);white-space:nowrap}@media(max-width:360px){.recent-result-row{grid-template-columns:58px minmax(0,1fr) auto;gap:5px;font-size:12px}}.training-attendance-open{font-size:12px}.attendance-player-row{flex-wrap:nowrap}.attendance-player-name{font-weight:750}</style>
+.results-header{display:flex;align-items:center;justify-content:space-between;margin:4px 0 15px}.results-header h2{font-size:26px;margin:0}.result-team-label{font-size:14px;font-weight:800;margin:16px 0 4px;color:var(--ink)}.result-set-row{display:flex;align-items:center;justify-content:center;gap:15px}.result-set-row .field{flex:1}.result-set-row span{font-size:28px;font-weight:800}.result-card{border-radius:16px;border:1px solid #228ec9;background:linear-gradient(135deg,#062746,#04172c);color:#fff;margin:11px 0;padding:15px}.result-meta{font-size:12px;color:#b9dcf1;margin-bottom:12px}.result-score{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:10px}.result-team{font-size:14px;font-weight:700;overflow-wrap:anywhere}.result-team:last-child{text-align:right}.result-team.winning{color:#5bf59e}.result-points{color:#55e790;font-size:24px;white-space:nowrap}@media(max-width:390px){.result-score{gap:5px}.result-team{font-size:12px}.result-points{font-size:20px}}.recent-result-row{display:grid;grid-template-columns:70px minmax(0,1fr) auto;align-items:center;gap:9px;padding:11px 1px;border-bottom:1px solid var(--line);font-size:13px}.recent-result-row:last-child{border:0}.recent-result-row small{color:var(--muted)}.recent-result-row span{overflow-wrap:anywhere}.recent-result-row strong{color:var(--green);white-space:nowrap}@media(max-width:360px){.recent-result-row{grid-template-columns:58px minmax(0,1fr) auto;gap:5px;font-size:12px}}.training-attendance-open{font-size:12px}.attendance-player-row{flex-wrap:nowrap}.attendance-player-name{font-weight:750}
+/* Dolaznost otvara vlastiti zaslon, umjesto malog skočnog prozora. */
+#attendanceModal.training-modal-overlay{
+ inset:0;
+ width:100%;
+ height:100vh;
+ height:100dvh;
+ padding:0;
+ background:var(--bg);
+ align-items:stretch;
+ justify-content:stretch;
+ z-index:110;
+}
+#attendanceModal .attendance-dialog{
+ width:100%;
+ max-width:none;
+ min-width:0;
+ height:100vh;
+ height:100dvh;
+ max-height:none;
+ margin:0;
+ border:0;
+ border-radius:0;
+ box-shadow:none;
+ padding:max(16px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));
+ background:var(--bg);
+ display:flex;
+ flex-direction:column;
+ overflow:hidden;
+}
+#attendanceModal .training-modal-head{
+ flex-shrink:0;
+ margin:0 0 8px;
+ padding:8px 0 12px;
+ border-bottom:1px solid var(--line);
+}
+#attendanceModal .training-modal-head h2{font-size:24px}
+#attendanceModal .training-modal-close{border:1px solid var(--line);background:var(--panel);width:48px;height:48px}
+#attendanceModal #attendanceModalDate{margin:4px 0 17px;font-size:14px;flex-shrink:0}
+#attendanceModal #attendanceModalBody{
+ flex:1;
+ min-height:0;
+ overflow-y:auto;
+ overscroll-behavior:contain;
+ padding-bottom:18px;
+ scrollbar-width:thin;
+}
+#attendanceModal .attendance-filters{
+ display:flex;
+ flex-wrap:wrap;
+ overflow-x:visible;
+ gap:8px;
+ padding:0 0 16px;
+}
+#attendanceModal .attendance-filter{min-height:44px;font-size:13px;padding:9px 13px}
+#attendanceModal .attendance-player-list{border-radius:15px}
+#attendanceModal .attendance-player-row{min-height:66px;padding:12px 14px}
+#attendanceModal .attendance-avatar{width:42px;height:42px;font-size:14px}
+#attendanceModal .attendance-player-name{font-size:15px}
+#attendanceModal .attendance-state{font-size:13px}
+@media(min-width:700px){
+ #attendanceModal .attendance-dialog{padding-left:max(24px,calc((100vw - 730px)/2));padding-right:max(24px,calc((100vw - 730px)/2))}
+}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
