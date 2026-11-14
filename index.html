@@ -580,8 +580,8 @@ function renderPlayers(){
   const name=node('strong','player-roster-name',p.name||'Igrač');
   const uid=p.rosterType==='google'?p.uid:p.linkedUid;
   const adminRole=uid?playerAdminRoles[uid]:null;
-  if(adminRole==='owner')name.prepend(node('span','player-role-badge owner','👑 Vlasnik '));
-  else if(adminRole==='admin')name.prepend(node('span','player-role-badge admin','🛡️ Admin '));
+  if(adminRole==='owner')name.append(node('span','player-role-badge owner',' 👑 Vlasnik'));
+  else if(adminRole==='admin')name.append(node('span','player-role-badge admin',' 🛡️ Admin'));
   const status=node('div','player-roster-status');
   const isGoogle=p.rosterType==='google';
   const hasLink=!!p.linkedUid;
