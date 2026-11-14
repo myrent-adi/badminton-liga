@@ -1,4 +1,4 @@
-const CACHE='silent-zagreb-role-badges-after-name-v31-20261114';
+const CACHE='silent-zagreb-role-badge-spacing-v32-20261114';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icons/silent-logo-192.png','./icons/silent-logo-512.png','./icons/apple-touch-icon.png','./icons/silent-maskable-512.png','./assets/silent-zagreb-logo.jpg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
