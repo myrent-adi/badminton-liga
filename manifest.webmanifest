@@ -1,9 +1,15 @@
 {
- "name":"Badminton Liga", "short_name":"Badminton", "description":"Badminton liga s Google prijavom",
- "lang":"hr", "start_url":"./index.html", "scope":"./", "display":"standalone",
- "background_color":"#f4f7f5", "theme_color":"#104d3a",
- "icons":[
- {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
- {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
- ]
+  "name": "Silent Zagreb Badminton",
+  "short_name": "Silent Badminton",
+  "description": "Privatna badminton zajednica gluhih i nagluhih iz Zagreba",
+  "lang": "hr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#061426",
+  "theme_color": "#061426",
+  "icons": [
+    {"src":"./icons/icon-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"./icons/icon-512.png","sizes":"512x512","type":"image/png","purpose":"any"}
+  ]
 }
