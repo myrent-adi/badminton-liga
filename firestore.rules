@@ -98,9 +98,16 @@ service cloud.firestore {
         allow get, list: if isMember();
         allow create, update: if isMember()
           && request.auth.uid == userId
-          && request.resource.data.keys().hasOnly(['choice', 'updatedAt'])
+          && request.resource.data.keys().hasOnly(['choice', 'updatedAt', 'displayName'])
           && request.resource.data.keys().hasAll(['choice', 'updatedAt'])
           && request.resource.data.choice in ['yes', 'no', 'maybe']
+          && (
+            !request.resource.data.keys().hasAny(['displayName'])
+            || (
+              request.auth.token.name is string
+              && request.resource.data.displayName == request.auth.token.name
+            )
+          )
           && request.resource.data.updatedAt == request.time;
         allow delete: if false;
       }
