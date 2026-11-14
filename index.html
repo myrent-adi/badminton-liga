@@ -1063,17 +1063,16 @@ function renderResults(){
   const points=node('strong','result-points',String(r.setsA)+' : '+String(r.setsB));
   score.append(namesA,points,namesB);item.append(meta,score);if(['owner','admin'].includes(currentRole)){const edit=node('button','result-edit-button'+(resultEditMode?'':' hidden'),'✏️ Uredi');edit.type='button';edit.setAttribute('aria-label','Uredi rezultat '+(Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A')+' protiv '+(Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B'));edit.addEventListener('click',()=>editResult(r.id));item.append(edit)}if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
  }
- if(!sorted.length)recent.append(node('div','hint','Još nema spremljenih mečeva.'));
- let lastRecentDate=null;
- for(const r of sorted.slice(0,3)){
-   if(r.date!==lastRecentDate){
-    const parts=String(r.date||'').split('-').map(Number);
-    const heading=(parts.length===3&&parts.every(Number.isInteger))
-      ?new Intl.DateTimeFormat('hr-HR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12)))
-      :String(r.date||'Datum nije dostupan');
-    recent.append(node('h3','recent-result-date',heading.replace(/^./,c=>c.toLocaleUpperCase('hr'))));
-    lastRecentDate=r.date;
-   }
+ if(!sorted.length){recent.append(node('div','hint','Još nema spremljenih mečeva.'));return}
+ // The home panel only shows matches from the latest day that has results.
+ const latestDate=sorted[0].date;
+ const latestResults=sorted.filter(r=>r.date===latestDate);
+ const parts=String(latestDate||'').split('-').map(Number);
+ const heading=(parts.length===3&&parts.every(Number.isInteger))
+   ?new Intl.DateTimeFormat('hr-HR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12)))
+   :String(latestDate||'Datum nije dostupan');
+ recent.append(node('h3','recent-result-date',heading.replace(/^./,c=>c.toLocaleUpperCase('hr'))));
+ for(const r of latestResults){
    const row=node('div','recent-result-row');
    const left=node('div','recent-result-team');
    const right=node('div','recent-result-team');
