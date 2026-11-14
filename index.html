@@ -338,6 +338,21 @@ body.modal-open{overflow:hidden}
  .result-team,.result-score-doubles .result-team{font-size:15px}
  .result-points,.result-score-doubles .result-points{font-size:23px}
 }
+
+/* Home: group latest results under prominent dates, with readable abbreviated names. */
+.recent-result-date{font-size:16px;line-height:1.35;font-weight:850;margin:17px 0 5px;color:var(--ink)}
+.recent-result-date:first-child{margin-top:9px}
+.recent-result-row{display:grid;grid-template-columns:minmax(0,1fr) 59px minmax(0,1fr);gap:8px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px}
+.recent-result-row:last-child{border-bottom:0}
+.recent-result-team{min-width:0;display:flex;flex-direction:column;gap:4px;font-size:15px;font-weight:750;line-height:1.3;overflow-wrap:anywhere}
+.recent-result-team:last-child{text-align:right;align-items:flex-end}
+.recent-result-player{display:block;min-width:0}
+.recent-result-points{font-size:19px;font-weight:850;color:var(--green);white-space:nowrap;text-align:center}
+@media(max-width:370px){
+ .recent-result-row{grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr);gap:5px}
+ .recent-result-team{font-size:14px}
+ .recent-result-points{font-size:18px}
+}
 </style>
 </head>
 <body>
@@ -375,7 +390,7 @@ body.modal-open{overflow:hidden}
 <div class="card next-training-card"><div class="between"><div><div class="eyeline">▣ Sljedeći trening</div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><p class="muted" id="nextTrainingInfo" style="margin:7px 0 0">Raspored će se pojaviti nakon što administrator doda prvi trening.</p></div></div></div>
 <div class="card"><div class="between attendance-heading"><h2><span aria-hidden="true">👥</span><span>Dolaznost na trening</span></h2><button type="button" class="home-attendance-open" id="homeMemberCount" aria-live="polite" title="Otvori dolaznost sljedećeg treninga" disabled>Učitavanje prijava…</button></div><div class="stats"><div class="stat go"><b id="homeYesCount">–</b><span>Dolaze</span></div><div class="stat no"><b id="homeNoCount">–</b><span>Ne dolaze</span></div><div class="stat maybe"><b id="homeMaybeCount">–</b><span>Možda</span></div><div class="stat"><b id="homePendingCount">–</b><span>Bez odgovora</span></div></div></div>
 <div class="mini-nav" style="margin-bottom:13px"><button class="tile" data-go="results"><span class="icon">🏆</span>Rezultati</button><button class="tile" id="homeAddResult"><span class="icon">🏸</span>Dodaj rezultat</button></div>
-<div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2><button type="button" class="results-arrow" data-go="results" aria-label="Otvori sve rezultate" title="Otvori rezultate">→</button></div><div id="homeRecentResults"><div class="hint">Učitavanje rezultata…</div></div></div>
+<div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2></div><div id="homeRecentResults"><div class="hint">Učitavanje rezultata…</div></div></div>
 </section>
 <section class="section" id="screen-trainings">
 <div class="training-top"><div class="training-top-row"><h2>Treninzi</h2><div class="training-top-actions"><button class="training-edit-trigger hidden" type="button" id="toggleTrainingEditMode" aria-label="Prikaži uređivanje treninga" aria-pressed="false" title="Upravljaj treninzima">✏️</button><button class="training-add-trigger hidden" type="button" id="openTrainingModal" aria-label="Dodaj novi trening" title="Dodaj trening">＋</button></div></div><p class="muted">Raspored treninga</p></div>
@@ -1049,13 +1064,25 @@ function renderResults(){
   score.append(namesA,points,namesB);item.append(meta,score);if(['owner','admin'].includes(currentRole)){const edit=node('button','result-edit-button'+(resultEditMode?'':' hidden'),'✏️ Uredi');edit.type='button';edit.setAttribute('aria-label','Uredi rezultat '+(Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A')+' protiv '+(Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B'));edit.addEventListener('click',()=>editResult(r.id));item.append(edit)}if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
  }
  if(!sorted.length)recent.append(node('div','hint','Još nema spremljenih mečeva.'));
+ let lastRecentDate=null;
  for(const r of sorted.slice(0,3)){
+   if(r.date!==lastRecentDate){
+    const parts=String(r.date||'').split('-').map(Number);
+    const heading=(parts.length===3&&parts.every(Number.isInteger))
+      ?new Intl.DateTimeFormat('hr-HR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12)))
+      :String(r.date||'Datum nije dostupan');
+    recent.append(node('h3','recent-result-date',heading.replace(/^./,c=>c.toLocaleUpperCase('hr'))));
+    lastRecentDate=r.date;
+   }
    const row=node('div','recent-result-row');
-   row.append(node('small','',String(r.date||'')),node('span','',[
-    Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A',
-    Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B'
-   ].join(' – ')),node('strong','',String(r.setsA)+' : '+String(r.setsB)));
-   recent.append(row);
+   const left=node('div','recent-result-team');
+   const right=node('div','recent-result-team');
+   const teamA=Array.isArray(r.teamANames)&&r.teamANames.length?r.teamANames:['Tim A'];
+   const teamB=Array.isArray(r.teamBNames)&&r.teamBNames.length?r.teamBNames:['Tim B'];
+   for(const name of teamA){const member=node('span','recent-result-player',shortResultPlayerName(name));member.title=String(name);left.append(member)}
+   for(const name of teamB){const member=node('span','recent-result-player',shortResultPlayerName(name));member.title=String(name);right.append(member)}
+   const score=node('strong','recent-result-points',String(r.setsA)+' : '+String(r.setsB));
+   row.append(left,score,right);recent.append(row);
  }
 }
 function node(tag,cls,text){const element=document.createElement(tag);if(cls)element.className=cls;if(text!==undefined)element.textContent=text;return element}
