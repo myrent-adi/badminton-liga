@@ -260,7 +260,7 @@ body.modal-open{overflow:hidden}
  #resultModal .result-preview.result-has-winner{background:#e3f9ef;color:#096541;border-color:#3ab77d}
  #resultModal .result-submit{color:#ffffff}
 }
-</style>
+.result-edit-button{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;margin-top:11px;padding:8px 13px;background:#e7f1ff;border:1px solid #bbd7f4;border-radius:10px;color:#14598b;font-size:13px;font-weight:800}.result-edit-button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}@media(prefers-color-scheme:dark){.result-edit-button{background:#123e61;color:#e2f5ff;border-color:#357aa6}}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -361,10 +361,10 @@ body.modal-open{overflow:hidden}
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js';
-import {getFirestore,doc,getDoc,getDocFromServer,setDoc,addDoc,serverTimestamp,onSnapshot,collection,query,updateDoc} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
+import {getFirestore,doc,getDoc,getDocFromServer,setDoc,addDoc,serverTimestamp,onSnapshot,collection,query,updateDoc,deleteField} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
 const firebaseConfig={apiKey:'AIzaSyCEgQgsZtKaFMiGCIimDOgwgx0O0OohvmY',authDomain:'badminton-liga-8d4ec.firebaseapp.com',projectId:'badminton-liga-8d4ec',storageBucket:'badminton-liga-8d4ec.firebasestorage.app',messagingSenderId:'944877889919',appId:'1:944877889919:web:7e3e98f0d89ebe6018524a'};
 const firebase=initializeApp(firebaseConfig),auth=getAuth(firebase),db=getFirestore(firebase),provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
-const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle('hidden',!value);let unsubscribers=[],generation=0,currentRole='player',playersCache=[],trainingCache=[],trainingVoteUnsubs=[],editingTrainingId=null,trainingShownMonth=new Date().getMonth(),trainingShownYear=new Date().getFullYear(),trainingAttendanceFilter='all',openAttendanceTrainingId=null,attendanceModalFocus=null,trainingVoteData={},resultsCache=[],resultModalReturnFocus=null,homeVotesUnsub=null,homeTrainingId=null,homeVotes=[],approvedGoogleUserIds=null,trainingEditMode=false;
+const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle('hidden',!value);let unsubscribers=[],generation=0,currentRole='player',playersCache=[],trainingCache=[],trainingVoteUnsubs=[],editingTrainingId=null,trainingShownMonth=new Date().getMonth(),trainingShownYear=new Date().getFullYear(),trainingAttendanceFilter='all',openAttendanceTrainingId=null,attendanceModalFocus=null,trainingVoteData={},resultsCache=[],resultModalReturnFocus=null,editingResultId=null,homeVotesUnsub=null,homeTrainingId=null,homeVotes=[],approvedGoogleUserIds=null,trainingEditMode=false;
 function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[];trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];if(homeVotesUnsub){homeVotesUnsub();homeVotesUnsub=null}homeTrainingId=null;homeVotes=[];approvedGoogleUserIds=null}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
@@ -784,9 +784,44 @@ function updateResultPreview(){
 }
 $('resultAddSet').addEventListener('click',()=>{$('resultSetRows').append(buildResultSet(3));show('resultAddSet',false);updateResultPreview()});
 $('homeAddResult').addEventListener('click',()=>{navigate('results');if(['owner','admin'].includes(currentRole))openResultModal()});
+function addResultPlayerFallback(selectId,playerId,playerName){
+ if(!playerId)return;
+ const select=$(selectId);
+ if(!Array.from(select.options).some(opt=>opt.value===playerId)){
+  select.add(new Option(playerName||'Igrač (postojeći rezultat)',playerId));
+ }
+ select.value=playerId;
+}
+function editResult(id){
+ if(!['owner','admin'].includes(currentRole))return;
+ const result=resultsCache.find(r=>r.id===id);if(!result)return;
+ openResultModal();
+ editingResultId=id;
+ $('resultModalTitle').textContent='Uredi rezultat';
+ $('resultSave').textContent='✓ Spremi promjene';
+ $('resultType').value=result.type==='doubles'?'doubles':'singles';
+ resultTypeChanged();
+ $('resultTraining').value=trainingCache.some(t=>t.id===result.trainingId)?result.trainingId:'';
+ $('resultDate').value=result.date||'';
+ $('resultDateField').classList.toggle('hidden',!!$('resultTraining').value);
+ const a=Array.isArray(result.teamA)?result.teamA:[],b=Array.isArray(result.teamB)?result.teamB:[];
+ addResultPlayerFallback('resultA1',a[0],result.teamANames?.[0]);
+ addResultPlayerFallback('resultB1',b[0],result.teamBNames?.[0]);
+ if(result.type==='doubles'){
+  addResultPlayerFallback('resultA2',a[1],result.teamANames?.[1]);
+  addResultPlayerFallback('resultB2',b[1],result.teamBNames?.[1]);
+ }
+ const sets=Array.isArray(result.pointSets)?result.pointSets:[];
+ $('resultSetRows').replaceChildren(buildResultSet(1,sets[0]?.a??'',sets[0]?.b??''),buildResultSet(2,sets[1]?.a??'',sets[1]?.b??''));
+ if(sets.length>=3)$('resultSetRows').append(buildResultSet(3,sets[2]?.a??'',sets[2]?.b??''));
+ show('resultAddSet',sets.length<3);
+ $('resultNote').value=typeof result.note==='string'?result.note:'';
+ updateResultPreview();
+}
 function openResultModal(){
  if(!['owner','admin'].includes(currentRole))return;
  resultModalReturnFocus=document.activeElement;
+ editingResultId=null;$('resultModalTitle').textContent='Dodaj rezultat';$('resultSave').textContent='✓ Spremi rezultat';
  $('resultForm').reset();$('resultFeedback').textContent='';$('resultType').value='singles';
  const today=new Date();$('resultDate').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
  $('resultSetRows').replaceChildren(buildResultSet(1),buildResultSet(2));show('resultAddSet',true);
@@ -798,7 +833,7 @@ function closeResultModal(){
  show('resultModal',false);$('resultModal').setAttribute('aria-hidden','true');document.body.classList.remove('result-screen-open');
  if($('trainingModal').classList.contains('hidden')&&$('attendanceModal').classList.contains('hidden'))document.body.classList.remove('modal-open');
  if(resultModalReturnFocus&&document.contains(resultModalReturnFocus))resultModalReturnFocus.focus();
- resultModalReturnFocus=null;
+ resultModalReturnFocus=null;editingResultId=null;
 }
 // Keep the full-screen editor outside page layout and stacking contexts.
 document.body.appendChild($('resultModal'));
@@ -824,6 +859,12 @@ $('resultForm').addEventListener('submit',async e=>{
  const ids=[...idsA,...idsB];
  if(ids.some(id=>!id)||new Set(ids).size!==ids.length){msg.textContent='Odaberi različite igrače za oba tima.';return}
  const selectable=resultSelectablePlayers();
+ if(editingResultId){
+  const original=resultsCache.find(r=>r.id===editingResultId);
+  if(original)for(const [id,name] of [...(original.teamA||[]).map((id,i)=>[id,original.teamANames?.[i]]),...(original.teamB||[]).map((id,i)=>[id,original.teamBNames?.[i]])]){
+   if(!selectable.some(p=>p.id===id))selectable.push({id,name:name||'Igrač'});
+  }
+ }
  if(ids.some(id=>!selectable.some(p=>p.id===id))){msg.textContent='Jedan od igrača više nije dostupan za odabir.';return}
  const sets=getResultSets(),outcome=resultSetOutcome(sets);
  if(!outcome){msg.textContent='Provjeri rezultat: pobjednik mora osvojiti 2 seta, a u svakom setu bodovi moraju biti različiti.';return}
@@ -832,10 +873,20 @@ $('resultForm').addEventListener('submit',async e=>{
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg.textContent='Odaberi valjani datum.';return}
  const getName=id=>selectable.find(p=>p.id===id)?.name||'Igrač';
  const record={date,type,teamA:idsA,teamB:idsB,teamANames:idsA.map(getName),teamBNames:idsB.map(getName),
-  setsA:outcome.winsA,setsB:outcome.winsB,pointSets:sets,note:$('resultNote').value.trim(),createdBy:auth.currentUser.uid,createdAt:serverTimestamp()};
+  setsA:outcome.winsA,setsB:outcome.winsB,pointSets:sets,note:$('resultNote').value.trim()};
  if(training)record.trainingId=training.id;
  save.disabled=true;msg.textContent='Spremanje…';
- try{await addDoc(collection(db,'results'),record);closeResultModal();notify('✅ Rezultat je spremljen.')}
+ try{
+  if(editingResultId){
+   const update={...record,updatedAt:serverTimestamp(),updatedBy:auth.currentUser.uid};
+   if(!training)update.trainingId=deleteField();
+   await updateDoc(doc(db,'results',editingResultId),update);
+   closeResultModal();notify('✅ Rezultat je ispravljen.');
+  }else{
+   await addDoc(collection(db,'results'),{...record,createdBy:auth.currentUser.uid,createdAt:serverTimestamp()});
+   closeResultModal();notify('✅ Rezultat je spremljen.');
+  }
+ }
  catch(error){msg.textContent=readableError(error)}finally{save.disabled=false}
 });
 function renderResults(){
@@ -849,7 +900,7 @@ function renderResults(){
   const namesA=node('span','result-team'+(r.setsA>r.setsB?' winning':''),Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A');
   const namesB=node('span','result-team'+(r.setsB>r.setsA?' winning':''),Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B');
   const points=node('strong','result-points',String(r.setsA)+' : '+String(r.setsB));
-  score.append(namesA,points,namesB);item.append(meta,score);if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
+  score.append(namesA,points,namesB);item.append(meta,score);if(['owner','admin'].includes(currentRole)){const edit=node('button','result-edit-button','✏️ Uredi');edit.type='button';edit.setAttribute('aria-label','Uredi rezultat '+(Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A')+' protiv '+(Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B'));edit.addEventListener('click',()=>editResult(r.id));item.append(edit)}if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
  }
  for(const r of sorted.slice(0,3)){
    const row=node('div','recent-result-row');
