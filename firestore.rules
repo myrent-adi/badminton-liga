@@ -122,12 +122,10 @@ service cloud.firestore {
         && setScore.b >= 0 && setScore.b <= 99
         && setScore.a != setScore.b;
     }
-    match /results/{resultId} {
-      allow get, list: if isMember();
-      allow create: if isAdmin()
-        && request.resource.data.keys().hasOnly([
+    function validResultData() {
+      return request.resource.data.keys().hasOnly([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
-          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'createdBy', 'createdAt'
+          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
@@ -208,9 +206,27 @@ service cloud.firestore {
             && get(/databases/$(database)/documents/trainings/$(request.resource.data.trainingId)).data.date == request.resource.data.date
           )
         )
+        && request.resource.data.createdBy is string
+        && request.resource.data.createdAt is timestamp;
+    }
+    match /results/{resultId} {
+      allow get, list: if isMember();
+      allow create: if isAdmin()
+        && validResultData()
+        && !request.resource.data.keys().hasAny(['updatedBy', 'updatedAt'])
         && request.resource.data.createdBy == request.auth.uid
         && request.resource.data.createdAt == request.time;
-      allow update, delete: if false;
+      allow update: if isAdmin()
+        && validResultData()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
+          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'updatedBy', 'updatedAt'
+        ])
+        && request.resource.data.createdBy == resource.data.createdBy
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.updatedAt == request.time;
+      allow delete: if false;
     }
     match /{document=**} {
       allow read, write: if false;
