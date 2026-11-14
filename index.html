@@ -550,10 +550,6 @@ function setPlayerListTab(tab){
 }
 $('playerTabActive').addEventListener('click',()=>setPlayerListTab('active'));
 $('playerTabInactive').addEventListener('click',()=>setPlayerListTab('inactive'));
-function playerInitials(name){
- const words=String(name||'').trim().split(/\s+/).filter(Boolean);
- return words.slice(0,2).map(word=>word[0].toLocaleUpperCase('hr')).join('')||'IG';
-}
 function playerRosterData(){
  const manual=playersCache.map(p=>({...p,rosterType:'manual'}));
  const googleUsers=[...approvedPlayersGoogle];
@@ -576,8 +572,6 @@ function renderPlayers(){
  selected.forEach((p,index)=>{
   const row=node('div','player-roster-row');
   const number=node('span','player-roster-number',String(index+1)+'.');
-  const avatar=node('span','player-roster-avatar',playerInitials(p.name));
-  avatar.setAttribute('aria-hidden','true');
   const info=node('div','player-roster-info');
   const name=node('strong','player-roster-name',p.name||'Igrač');
   const status=node('div','player-roster-status');
@@ -587,7 +581,7 @@ function renderPlayers(){
   const googleStatus=isGoogle?'Google račun':hasLink?'Google povezan':'Bez Google veze';
   status.append(node('span','player-google-status '+(isGoogle||hasLink?'connected':'unlinked'),(isGoogle||hasLink?'✓ ':'○ ')+googleStatus));
   info.append(name,status);
-  row.append(number,avatar,info);
+  row.append(number,info);
   if(p.rosterType==='manual'&&['owner','admin'].includes(currentRole)){
    const actions=node('div','actions player-admin-actions'+(playerEditMode?'':' hidden'));
    const edit=node('button','button secondary','✏️ Uredi');edit.type='button';edit.addEventListener('click',()=>beginEditPlayer(p.id));actions.append(edit);
