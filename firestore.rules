@@ -1,0 +1,76 @@
+// Silent Zagreb Badminton — Firestore sigurnosna pravila.
+// Ovo je REFERENTNA DATOTEKA. Firestore ne ucitava pravila iz GitHuba automatski.
+// Nakon provjere, kopirati cijeli sadrzaj u Firebase Console > Firestore > Rules > Publish.
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function hasAdminDoc() {
+      return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    function isOwner() {
+      return hasAdminDoc()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'owner';
+    }
+    function isAdmin() {
+      return hasAdminDoc()
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role in ['owner', 'admin'];
+    }
+    function isMember() {
+      return isAdmin() || (
+        signedIn()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved'
+      );
+    }
+    match /users/{userId} {
+      allow get: if signedIn() && (request.auth.uid == userId || isAdmin());
+      allow list: if isAdmin();
+      allow create: if signedIn()
+        && request.auth.uid == userId
+        && request.resource.data.keys().hasOnly(['displayName', 'email', 'status'])
+        && request.resource.data.keys().hasAll(['displayName', 'email', 'status'])
+        && request.resource.data.displayName is string
+        && request.resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'pending';
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['pending', 'approved', 'rejected'];
+      allow delete: if false;
+    }
+    match /admins/{adminId} {
+      allow get: if signedIn() && (request.auth.uid == adminId || isOwner());
+      allow list: if isOwner();
+      allow create: if isOwner()
+        && request.resource.data.keys().hasOnly(['role'])
+        && request.resource.data.role == 'admin';
+      allow update: if false;
+      allow delete: if isOwner() && resource.data.role == 'admin';
+    }
+    match /players/{playerId} {
+      allow get, list: if isMember();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name', 'active', 'createdBy', 'createdAt'])
+        && request.resource.data.keys().hasAll(['name', 'active', 'createdBy', 'createdAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.active == true
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.createdAt == request.time;
+      allow update: if isAdmin()
+        && request.resource.data.keys().hasOnly(['name', 'active', 'createdBy', 'createdAt'])
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'active'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() >= 2
+        && request.resource.data.name.size() <= 80
+        && request.resource.data.active is bool;
+      allow delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
