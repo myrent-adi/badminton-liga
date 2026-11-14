@@ -203,13 +203,13 @@ async function togglePlayer(id,button){
 }
 $('playerForm').addEventListener('submit',async event=>{event.preventDefault();const button=$('savePlayer'),feedback=$('playerFormFeedback');if(!['owner','admin'].includes(currentRole)){feedback.textContent='Samo administrator može dodavati igrače.';return}const name=normalizedPlayerName($('playerName').value);if(name.length<2||name.length>80){feedback.textContent='Upiši ime igrača (2–80 znakova).';return}if(playerNameExists(name)){feedback.textContent='Igrač s tim imenom već postoji na popisu, uključujući neaktivne.';return}button.disabled=true;feedback.textContent='Spremanje…';try{await addDoc(collection(db,'players'),{name,active:true,createdBy:auth.currentUser.uid,createdAt:serverTimestamp()});$('playerForm').reset();feedback.textContent='✅ Igrač je spremljen.'}catch(error){feedback.textContent=readableError(error)}finally{button.disabled=false}});
 
-function trainingTimeValid(start,end){return /^\\d{2}:\\d{2}$/.test(start)&&/^\\d{2}:\\d{2}$/.test(end)&&start<end}
+function trainingTimeValid(start,end){return /^\d{2}:\d{2}$/.test(start)&&/^\d{2}:\d{2}$/.test(end)&&start<end}
 function formatTrainingDate(iso){const [y,m,d]=String(iso).split('-').map(Number);const date=new Date(y,m-1,d);return Number.isFinite(date.valueOf())?new Intl.DateTimeFormat('hr-HR',{weekday:'short',day:'numeric',month:'numeric'}).format(date):iso}
 $('trainingForm').addEventListener('submit',async e=>{
  e.preventDefault();const msg=$('trainingFeedback'),button=$('trainingSave');
  if(!['owner','admin'].includes(currentRole)){msg.textContent='Samo administrator može dodati trening.';return}
  const date=$('trainingDate').value,start=$('trainingStart').value,end=$('trainingEnd').value;
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!trainingTimeValid(start,end)){msg.textContent='Provjeri datum i vrijeme treninga.';return}
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!trainingTimeValid(start,end)){msg.textContent='Provjeri datum i vrijeme treninga.';return}
  if(trainingCache.some(t=>t.date===date&&t.start===start)){msg.textContent='Trening s istim datumom i početkom već postoji.';return}
  button.disabled=true;msg.textContent='Spremanje…';
  try{await addDoc(collection(db,'trainings'),{date,start,end,active:true,createdBy:auth.currentUser.uid,createdAt:serverTimestamp()});msg.textContent='✅ Trening je spremljen.';$('trainingDate').value=''}
