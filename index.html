@@ -210,7 +210,7 @@ import {getFirestore,doc,getDoc,getDocFromServer,setDoc,addDoc,serverTimestamp,o
 const firebaseConfig={apiKey:'AIzaSyCEgQgsZtKaFMiGCIimDOgwgx0O0OohvmY',authDomain:'badminton-liga-8d4ec.firebaseapp.com',projectId:'badminton-liga-8d4ec',storageBucket:'badminton-liga-8d4ec.firebasestorage.app',messagingSenderId:'944877889919',appId:'1:944877889919:web:7e3e98f0d89ebe6018524a'};
 const firebase=initializeApp(firebaseConfig),auth=getAuth(firebase),db=getFirestore(firebase),provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
 const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle('hidden',!value);let unsubscribers=[],generation=0,currentRole='player',playersCache=[],trainingCache=[],trainingVoteUnsubs=[],editingTrainingId=null,trainingShownMonth=new Date().getMonth(),trainingShownYear=new Date().getFullYear(),trainingAttendanceFilter='all',openAttendanceTrainingId=null,attendanceModalFocus=null,trainingVoteData={},resultsCache=[],resultModalReturnFocus=null;
-function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[];trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];manualAttendanceData={}}
+function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[];trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[]}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
 function navigate(name){if(name!=='trainings')closeAttendanceModal();if(name!=='results')closeResultModal();document.body.classList.toggle('subpage',name!=='home');document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
@@ -389,7 +389,7 @@ function renderAttendanceModal(){
  const list=node('div','attendance-player-list');
  function fill(){
   list.replaceChildren();
-  const selected=rows.filter(r=>trainingAttendanceFilter==='all'||(trainingAttendanceFilter==='pending'?!['yes','no','maybe'].includes(r.choice):r.choice===trainingAttendanceFilter));
+  const selected=rows.filter(r=>trainingAttendanceFilter==='all'||(r.choice===trainingAttendanceFilter));
   if(!selected.length){list.append(node('p','attendance-empty','Nema igrača u ovoj skupini.'));return}
   for(const {name,choice} of selected){
    const row=node('div','attendance-player-row'),left=node('div','attendance-player-left');
