@@ -288,31 +288,40 @@ body.modal-open{overflow:hidden}
 .results-day-number{font-size:24px;line-height:1.15;color:var(--ink)}
 .results-day-count{font-size:11px;font-weight:650;color:var(--muted)}
 .results-day-summary{font-size:13px;color:var(--muted);font-weight:750;margin:2px 2px 9px}
-/* Center month arrows beside the month label on both Treninzi and Rezultati. */
+/* Keep month arrows at left and right edges, center each icon inside its button. */
 .training-month-nav,.training-month-nav.results-month-nav{
- display:flex;
+ display:grid;
+ grid-template-columns:44px minmax(0,1fr) 44px;
  align-items:center;
- justify-content:center;
- gap:clamp(8px,3vw,16px);
+ justify-content:stretch;
+ column-gap:10px;
  margin:0 0 14px;
 }
 .training-month-nav h3{
- flex:0 1 auto;
+ width:auto;
  min-width:0;
- width:clamp(138px,43vw,188px);
- text-align:center;
  margin:0;
- font-size:18px;
+ text-align:center;
+ font-size:19px;
  line-height:1.25;
 }
 .training-month-nav button{
+ display:grid;
+ place-items:center;
  width:44px;
  height:44px;
- flex:0 0 44px;
+ padding:0;
+ border-radius:13px;
+ line-height:1;
+}
+.training-month-nav button svg{
+ display:block;
+ width:19px;
+ height:19px;
 }
 @media(max-width:350px){
- .training-month-nav h3{width:135px;font-size:16px}
- .training-month-nav{gap:7px}
+ .training-month-nav h3{font-size:17px}
+ .training-month-nav{column-gap:6px}
 }
 </style>
 </head>
@@ -355,7 +364,7 @@ body.modal-open{overflow:hidden}
 </section>
 <section class="section" id="screen-trainings">
 <div class="training-top"><div class="training-top-row"><h2>Treninzi</h2><div class="training-top-actions"><button class="training-edit-trigger hidden" type="button" id="toggleTrainingEditMode" aria-label="Prikaži uređivanje treninga" aria-pressed="false" title="Upravljaj treninzima">✏️</button><button class="training-add-trigger hidden" type="button" id="openTrainingModal" aria-label="Dodaj novi trening" title="Dodaj trening">＋</button></div></div><p class="muted">Raspored treninga</p></div>
-<div class="training-month-nav"><button id="trainingPrevMonth" type="button" aria-label="Prethodni mjesec">‹</button><h3 id="trainingMonthTitle" aria-live="polite">Učitavanje…</h3><button id="trainingNextMonth" type="button" aria-label="Sljedeći mjesec">›</button></div>
+<div class="training-month-nav"><button id="trainingPrevMonth" type="button" aria-label="Prethodni mjesec"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 id="trainingMonthTitle" aria-live="polite">Učitavanje…</h3><button id="trainingNextMonth" type="button" aria-label="Sljedeći mjesec"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 <div id="trainingsList" class="training-list"><div class="hint">Učitavanje treninga…</div></div>
 <div class="training-modal-overlay hidden" id="attendanceModal" aria-hidden="true">
  <div class="training-modal attendance-dialog" role="dialog" aria-modal="true" aria-labelledby="attendanceModalTitle">
@@ -375,7 +384,7 @@ body.modal-open{overflow:hidden}
 </section>
 <section class="section" id="screen-results">
 <div class="results-header"><h2>Rezultati</h2><div class="training-top-actions"><button type="button" id="toggleResultEditMode" class="training-edit-trigger hidden" title="Upravljaj rezultatima" aria-label="Prikaži uređivanje rezultata" aria-pressed="false">✏️</button><button type="button" id="openResultModal" class="training-add-trigger hidden" title="Dodaj rezultat" aria-label="Dodaj rezultat">＋</button></div></div>
-<div class="training-month-nav results-month-nav"><button id="resultsPrevMonth" type="button" aria-label="Prethodni mjesec">‹</button><h3 id="resultsMonthTitle" aria-live="polite">Učitavanje…</h3><button id="resultsNextMonth" type="button" aria-label="Sljedeći mjesec">›</button></div>
+<div class="training-month-nav results-month-nav"><button id="resultsPrevMonth" type="button" aria-label="Prethodni mjesec"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.5 5-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button><h3 id="resultsMonthTitle" aria-live="polite">Učitavanje…</h3><button id="resultsNextMonth" type="button" aria-label="Sljedeći mjesec"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9.5 5 7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
 <div id="resultsDays" class="results-days" role="group" aria-label="Odaberi dan za rezultate"></div>
 <div id="resultsDaySummary" class="results-day-summary" aria-live="polite"></div>
 <div id="resultsList" aria-live="polite"><div class="hint">Učitavanje rezultata…</div></div>
