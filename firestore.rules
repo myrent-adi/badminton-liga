@@ -94,19 +94,6 @@ service cloud.firestore {
         && request.resource.data.end is string
         && request.resource.data.active is bool;
       allow delete: if false;
-      // Administrator can record attendance for players without Google accounts.
-      // The document ID is the player's Firestore ID, never a free-form name.
-      match /manualAttendance/{playerId} {
-        allow get, list: if isMember();
-        allow create, update: if isAdmin()
-          && exists(/databases/$(database)/documents/players/$(playerId))
-          && request.resource.data.keys().hasOnly(['choice', 'updatedAt', 'updatedBy'])
-          && request.resource.data.keys().hasAll(['choice', 'updatedAt', 'updatedBy'])
-          && request.resource.data.choice in ['yes', 'no', 'maybe', 'pending']
-          && request.resource.data.updatedAt == request.time
-          && request.resource.data.updatedBy == request.auth.uid;
-        allow delete: if false;
-      }
       match /votes/{userId} {
         allow get, list: if isMember();
         allow create, update: if isMember()
