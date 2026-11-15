@@ -447,7 +447,21 @@ body.modal-open{overflow:hidden}
 .next-training-clock{display:inline-grid;place-items:center;color:var(--accent);flex-shrink:0}
 .next-training-clock svg{width:23px;height:23px}
 @media(max-width:370px){.next-training-card .datebig{font-size:18px}.next-training-time{font-size:17px;padding:9px 11px}}
-#screen-home .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}</style>
+#screen-home .stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+/* Home last-results list: compact matching rows with match-type icons and date. */
+#homeRecentResults .recent-result-list-row{display:flex;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);min-width:0}
+#homeRecentResults .recent-result-list-row:last-child{border-bottom:0}
+#homeRecentResults .more-match-symbol{width:32px;height:36px;flex:0 0 32px;display:grid;place-items:center}
+#homeRecentResults .more-match-symbol svg{width:32px;height:32px;display:block}
+#homeRecentResults .match-icon-doubles{color:#9b68e5}
+#homeRecentResults .match-icon-singles{color:#168cdb}
+#homeRecentResults .recent-result-teams{flex:1;min-width:0;overflow-wrap:anywhere}
+#homeRecentResults .recent-result-teams strong{font-size:14px;line-height:1.35;display:block;color:var(--ink);white-space:normal}
+#homeRecentResults .recent-result-teams small{font-size:11px;color:var(--muted);display:block;margin-top:4px}
+#homeRecentResults .recent-result-score{font-size:20px;font-weight:850;white-space:nowrap;color:var(--ink);text-align:right;flex-shrink:0}
+#homeRecentResults .recent-result-score small{display:block;font-size:10px;font-weight:550;color:var(--muted);margin-top:3px}
+@media(max-width:365px){#homeRecentResults .recent-result-list-row{gap:7px}#homeRecentResults .more-match-symbol{width:27px;flex-basis:27px}#homeRecentResults .more-match-symbol svg{width:27px;height:27px}#homeRecentResults .recent-result-teams strong{font-size:13px}#homeRecentResults .recent-result-score{font-size:18px}}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -1442,21 +1456,24 @@ function renderResults(){renderMoreStats();
  // The home panel only shows matches from the latest day that has results.
  const latestDate=sorted[0].date;
  const latestResults=sorted.filter(r=>r.date===latestDate);
- const parts=String(latestDate||'').split('-').map(Number);
- const heading=(parts.length===3&&parts.every(Number.isInteger))
-   ?new Intl.DateTimeFormat('hr-HR',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'}).format(new Date(Date.UTC(parts[0],parts[1]-1,parts[2],12)))
-   :String(latestDate||'Datum nije dostupan');
- recent.append(node('h3','recent-result-date',heading.replace(/^./,c=>c.toLocaleUpperCase('hr'))));
  for(const r of latestResults){
-   const row=node('div','recent-result-row');
-   const left=node('div','recent-result-team');
-   const right=node('div','recent-result-team');
-   const teamA=Array.isArray(r.teamANames)&&r.teamANames.length?r.teamANames:['Tim A'];
-   const teamB=Array.isArray(r.teamBNames)&&r.teamBNames.length?r.teamBNames:['Tim B'];
-   for(const name of teamA){const member=node('span','recent-result-player',shortResultPlayerName(name));member.title=String(name);left.append(member)}
-   for(const name of teamB){const member=node('span','recent-result-player',shortResultPlayerName(name));member.title=String(name);right.append(member)}
-   const score=node('strong','recent-result-points',String(r.setsA)+' : '+String(r.setsB));
-   row.append(left,score,right);recent.append(row);
+  const row=node('div','recent-result-row recent-result-list-row');
+  const doubles=r.type==='doubles';
+  const icon=node('span','more-match-symbol '+(doubles?'match-icon-doubles':'match-icon-singles'));
+  icon.setAttribute('role','img');
+  icon.setAttribute('aria-label',doubles?'Parovi – dva reketa':'Pojedinačno – jedan reket');
+  icon.innerHTML=doubles
+   ?'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="14" cy="13" rx="7" ry="10" transform="rotate(-34 14 13)"/><ellipse cx="28" cy="13" rx="7" ry="10" transform="rotate(34 28 13)"/><path d="M19 21 7 37M23 21l12 16M10 6l9 13M7 12l11 4M32 6l-9 13m12-7-11 4M5 37l5-6m27 6-5-6"/></g></svg>'
+   :'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="22" cy="15" rx="9" ry="12" transform="rotate(30 22 15)"/><path d="M17 25 8 38M12 36l-6-4M17 6l12 17M13 12l17 7M15 19l14 2M24 4l9 17"/></g></svg>';
+  const teams=node('div','recent-result-teams');
+  const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
+  teams.append(node('strong','',shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames)));
+  teams.append(node('small','',String(r.date||'')+' · '+(doubles?'Parovi':'Pojedinačno')));
+  const score=node('div','recent-result-score',String(r.setsA)+' : '+String(r.setsB));
+  const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
+  if(points)score.append(node('small','', '('+points+')'));
+  row.append(icon,teams,score);
+  recent.append(row);
  }
 }
 function node(tag,cls,text){const element=document.createElement(tag);if(cls)element.className=cls;if(text!==undefined)element.textContent=text;return element}
