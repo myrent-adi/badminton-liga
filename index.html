@@ -402,6 +402,29 @@ body.modal-open{overflow:hidden}
 .more-about-icon{font-size:44px}.more-about-card h2{font-size:24px;margin-top:12px}.more-lead{color:var(--accent);font-weight:800;font-size:16px}
 .more-about-card p{font-size:15px;line-height:1.7}.more-credit{background:var(--accent-soft);border-radius:12px;padding:14px;margin-top:20px;line-height:1.8;font-size:14px}
 @media(max-width:370px){.more-photo{width:65px;height:65px;flex-basis:65px}.more-profile-copy strong{font-size:18px}.more-stats-card{grid-template-columns:105px minmax(0,1fr);gap:8px;padding:10px}.more-ring{width:100px;height:100px;padding:10px}.more-ring strong{font-size:23px}.more-stats-numbers>div{font-size:12px;padding:9px 0}.more-stats-numbers strong{font-size:16px}}
+
+/* Group statistics - inspired by the sample, theme-aware, without account header. */
+.group-stats-heading{display:flex;align-items:center;gap:9px;margin:1px 0 18px}
+.group-stats-heading h2{font-size:22px;margin:0;font-weight:850}
+.group-stats-back{border:0;background:transparent;color:var(--accent);font-size:36px;font-weight:450;width:42px;height:46px;line-height:1;display:grid;place-items:center}
+.group-stats-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;padding:4px;border:1px solid var(--line);border-radius:30px;background:var(--panel2);margin-bottom:16px}
+.group-stats-tab{min-width:0;min-height:43px;border:0;border-radius:25px;background:transparent;color:var(--ink);font-size:14px;font-weight:740;padding:8px 2px}
+.group-stats-tab.active{background:linear-gradient(120deg,#00b8f5,#0875e3);color:#fff;box-shadow:0 2px 6px #00467550}
+.group-stat-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:0 0 13px}
+.group-stat-tile{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:114px;padding:10px 3px 9px;border:1px solid var(--line);border-radius:15px;background:var(--panel);box-shadow:var(--shadow)}
+.group-stat-tile>span{font-size:25px;line-height:1.3}.group-stat-tile strong{font-size:23px;line-height:1.25;font-weight:850}.group-stat-tile small{font-size:12px;color:var(--muted);font-weight:650}
+.group-success-card{padding:15px 10px;background:var(--panel);border:1px solid var(--line);border-radius:17px;margin-bottom:13px}
+.group-success-card h3{font-size:16px;margin:0 0 14px}
+.group-rings{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.group-ring-item{min-width:0}
+.group-ring{width:100%;aspect-ratio:1;border-radius:50%;padding:clamp(7px,2vw,11px);background:conic-gradient(var(--ring-color) var(--progress,0%),var(--line) 0);display:grid;place-items:center}
+.group-ring.singles{--ring-color:#02baf1}.group-ring.doubles{--ring-color:#9c65ee}.group-ring.total{--ring-color:#35d66f}
+.group-ring>div{height:100%;width:100%;background:var(--panel);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-width:0}
+.group-ring small{font-size:clamp(10px,2.5vw,13px);font-weight:680;line-height:1.15;color:var(--muted)}
+.group-ring strong{font-size:clamp(17px,5vw,27px);line-height:1.2}
+.group-ring span{font-size:clamp(10px,2.5vw,13px);color:var(--muted)}
+.group-recent-card{margin-bottom:8px}.group-stats-note{font-size:12px;line-height:1.45}
+@media(max-width:370px){.group-stat-tiles{gap:5px}.group-stat-tile{min-height:99px}.group-stat-tile strong{font-size:20px}.group-stat-tile small{font-size:10px}.group-stat-tile>span{font-size:22px}.group-rings{gap:6px}.group-ring{padding:7px}.group-stats-tab{font-size:12px}}
 </style>
 </head>
 <body>
@@ -512,14 +535,35 @@ body.modal-open{overflow:hidden}
 <div id="editPlayerRoleActions" class="player-role-actions hidden"></div>
 <div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div><div class="training-modal-overlay hidden" id="playersAdmin" aria-hidden="true"><div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle"><div class="training-modal-head"><h2 id="playerModalTitle">➕ Dodaj igrača</h2><button type="button" class="training-modal-close" id="closePlayerModal" aria-label="Zatvori dodavanje igrača">×</button></div><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Google račun možeš povezati kasnije kroz Uredi igrača.</p></div></div></section>
 <section class="section" id="screen-more">
-<div class="more-profile"><div class="more-photo"><span id="moreInitials">🏸</span><img id="morePhoto" class="hidden" alt="Google profilna fotografija" referrerpolicy="no-referrer"></div><div class="more-profile-copy"><strong id="moreName">Igrač</strong><span id="moreSince">🏸 Član zajednice</span><span id="moreRole">Igrač</span></div></div>
+<div class="more-profile" id="moreProfileCard"><div class="more-photo"><span id="moreInitials">🏸</span><img id="morePhoto" class="hidden" alt="Google profilna fotografija" referrerpolicy="no-referrer"></div><div class="more-profile-copy"><strong id="moreName">Igrač</strong><span id="moreSince">🏸 Član zajednice</span><span id="moreRole">Igrač</span></div></div>
 <div id="moreOverview">
 <div class="more-menu"><button class="more-menu-button" id="moreShowStats" type="button"><span class="more-menu-symbol">▥</span> Statistika <span class="more-chevron">›</span></button><button class="more-menu-button" id="moreShowAbout" type="button"><span class="more-menu-symbol">ⓘ</span> O aplikaciji <span class="more-chevron">›</span></button></div>
 <div id="accountMount"></div>
 <div class="card"><h2>Postavke</h2><div class="entry"><strong>Izgled aplikacije</strong><small>Prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju.</small></div></div>
 <div id="admin" class="card hidden"><h2 id="adminHeading">👑 Administracija · prijave članova</h2><p class="muted">Odobri ili odbij novog igrača.</p><div class="muted" id="adminCount">Učitavanje…</div><div id="userRows"></div></div>
 </div>
-<div id="moreStats" class="hidden"><button class="more-back" data-more-back type="button">‹ Natrag</button><h2>Moja statistika</h2><div class="more-stats-card"><div class="more-ring" id="moreRing"><div><strong id="morePercent">0%</strong><small>uspjeh</small></div></div><div class="more-stats-numbers"><div><span>🟢 Pobjede</span><strong id="moreWins">0</strong></div><div><span>🔴 Porazi</span><strong id="moreLosses">0</strong></div><div><span>⚪ Odigrano</span><strong id="morePlayed">0</strong></div></div></div><div class="more-match-card"><h3>Zadnjih 5 mečeva</h3><div id="moreMatchRows"></div></div><p class="muted">Statistika se računa prema rezultatima povezanim s tvojim profilom igrača.</p></div>
+<div id="moreStats" class="hidden">
+<div class="group-stats-heading"><button class="group-stats-back" data-more-back type="button" aria-label="Natrag na Više">‹</button><h2>Statistika grupe</h2></div>
+<div class="group-stats-tabs" role="tablist" aria-label="Vrsta mečeva">
+<button type="button" role="tab" id="groupTabAll" data-group-type="all" class="group-stats-tab active" aria-selected="true">Ukupno</button>
+<button type="button" role="tab" id="groupTabSingles" data-group-type="singles" class="group-stats-tab" aria-selected="false">Pojedinačni</button>
+<button type="button" role="tab" id="groupTabDoubles" data-group-type="doubles" class="group-stats-tab" aria-selected="false">Parovi</button>
+</div>
+<div class="group-stat-tiles">
+<div class="group-stat-tile"><span aria-hidden="true">🏆</span><strong id="groupMatches">0</strong><small>mečeva</small></div>
+<div class="group-stat-tile"><span aria-hidden="true">♙</span><strong id="groupPlayers">0</strong><small>igrača</small></div>
+<div class="group-stat-tile"><span aria-hidden="true">◎</span><strong id="groupSets">0</strong><small>setova</small></div>
+<div class="group-stat-tile"><span aria-hidden="true">🎯</span><strong id="groupSuccess">0%</strong><small>uspjeh</small></div>
+</div>
+<div class="group-success-card"><h3>Uspjeh po tipu meča</h3>
+<div class="group-rings">
+<div class="group-ring-item"><div class="group-ring singles" id="groupRingSingles"><div><small>Pojedinačni</small><strong id="groupRateSingles">0%</strong><span id="groupDetailSingles">0/0</span></div></div></div>
+<div class="group-ring-item"><div class="group-ring doubles" id="groupRingDoubles"><div><small>Parovi</small><strong id="groupRateDoubles">0%</strong><span id="groupDetailDoubles">0/0</span></div></div></div>
+<div class="group-ring-item"><div class="group-ring total" id="groupRingTotal"><div><small>Ukupno</small><strong id="groupRateTotal">0%</strong><span id="groupDetailTotal">0/0</span></div></div></div>
+</div></div>
+<div class="more-match-card group-recent-card"><h3>Zadnjih 5 mečeva</h3><div id="moreMatchRows"></div></div>
+<p class="muted group-stats-note">Prikaz prema spremljenim rezultatima lige. Uspjeh je udio mečeva završenih rezultatom 2 : 0 (pobjeda bez izgubljenog seta); za sva tri prikaza računa se na jednak način.</p>
+</div>
 <div id="moreAbout" class="hidden"><button class="more-back" data-more-back type="button">‹ Natrag</button><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit">💻 Ideja, dizajn i izrada: <strong>Adi · web programer</strong><br>💙 Za zajednicu Silent Zagreb Badminton.</div></div></div>
 </section>
 </div>
@@ -544,6 +588,7 @@ document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('
 $('login').addEventListener('click',async()=>{const button=$('login');button.disabled=true;notify('');try{await signInWithPopup(auth,provider)}catch(error){notify(readableError(error),true)}finally{button.disabled=false}});
 $('logout').addEventListener('click',async()=>{try{await signOut(auth)}catch(error){notify(readableError(error),true)}});
 function openMoreSection(page){
+ show('moreProfileCard',page==='overview');
  show('moreOverview',page==='overview');show('moreStats',page==='stats');show('moreAbout',page==='about');
  if(page==='stats')renderMoreStats();
 }
@@ -580,19 +625,53 @@ function personalMatches(){
   return {...r,meOnA:inA,won:inA?Number(r.setsA)>Number(r.setsB):Number(r.setsB)>Number(r.setsA)};
  }).filter(Boolean).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id||'').localeCompare(String(a.id||'')));
 }
+let groupStatsType='all';
+document.querySelectorAll('[data-group-type]').forEach(button=>button.addEventListener('click',()=>{
+ groupStatsType=button.dataset.groupType;
+ document.querySelectorAll('[data-group-type]').forEach(tab=>{const active=tab.dataset.groupType===groupStatsType;tab.classList.toggle('active',active);tab.setAttribute('aria-selected',String(active))});
+ renderMoreStats();
+}));
+function groupMatchRate(matches){
+ const completed=matches.filter(r=>Number.isFinite(Number(r.setsA))&&Number.isFinite(Number(r.setsB)));
+ const straight=completed.filter(r=>Math.max(Number(r.setsA),Number(r.setsB))===2&&Math.min(Number(r.setsA),Number(r.setsB))===0).length;
+ return {count:straight,total:completed.length,percentage:completed.length?Math.round(100*straight/completed.length):0};
+}
 function renderMoreStats(){
- const matches=personalMatches(),wins=matches.filter(r=>r.won).length,losses=matches.length-wins,pct=matches.length?Math.round(wins/matches.length*100):0;
- $('morePercent').textContent=pct+'%';$('moreWins').textContent=String(wins);$('moreLosses').textContent=String(losses);$('morePlayed').textContent=String(matches.length);$('moreRing').style.setProperty('--progress',pct+'%');
+ const all=resultsCache.filter(r=>r&&r.date&&(r.type==='singles'||r.type==='doubles'));
+ const filtered=groupStatsType==='all'?all:all.filter(r=>r.type===groupStatsType);
+ const ids=new Set(),names=new Set();
+ for(const r of filtered){
+  for(const id of [...(Array.isArray(r.teamA)?r.teamA:[]),...(Array.isArray(r.teamB)?r.teamB:[])])if(id)ids.add(String(id));
+  for(const name of [...(Array.isArray(r.teamANames)?r.teamANames:[]),...(Array.isArray(r.teamBNames)?r.teamBNames:[])])if(name)names.add(String(name).trim().toLocaleLowerCase('hr'));
+ }
+ const activePlayers=playersCache.filter(p=>p.active===true).length;
+ const totalPlayers=groupStatsType==='all'?Math.max(activePlayers,ids.size,names.size):Math.max(ids.size,names.size);
+ const sets=filtered.reduce((sum,r)=>sum+(Array.isArray(r.pointSets)&&r.pointSets.length?r.pointSets.length:(Number(r.setsA)||0)+(Number(r.setsB)||0)),0);
+ $('groupMatches').textContent=String(filtered.length);
+ $('groupPlayers').textContent=String(totalPlayers);
+ $('groupSets').textContent=String(sets);
+ $('groupSuccess').textContent=groupMatchRate(filtered).percentage+'%';
+ for(const [key,matches] of [['Singles',all.filter(r=>r.type==='singles')],['Doubles',all],['Total',all]]){
+  const items=key==='Doubles'?all.filter(r=>r.type==='doubles'):matches;
+  const rate=groupMatchRate(items);
+  $('groupRate'+key).textContent=rate.percentage+'%';
+  $('groupDetail'+key).textContent='('+rate.count+'/'+rate.total+')';
+  $('groupRing'+key).style.setProperty('--progress',rate.percentage+'%');
+ }
  const host=$('moreMatchRows');host.replaceChildren();
- if(!matches.length){host.append(node('p','muted','Još nema spremljenih mečeva povezanih s tvojim profilom.'));return}
- for(const r of matches.slice(0,5)){
-  const row=node('div','more-match-row'),other=r.meOnA?r.teamBNames:r.teamANames;
-  const names=(Array.isArray(other)&&other.length?other:['Protivnici']).map(shortResultPlayerName).join(' / ');
-  const opponent=node('div','more-opponent','vs '+names);opponent.append(node('small','',String(r.date||'')));
-  const score=node('div','more-match-score '+(r.won?'win':'loss'),String(r.setsA)+' : '+String(r.setsB));
+ const recent=[...filtered].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id||'').localeCompare(String(a.id||''))).slice(0,5);
+ if(!recent.length){host.append(node('p','muted','Nema spremljenih mečeva za odabranu vrstu.'));return}
+ for(const r of recent){
+  const row=node('div','more-match-row');
+  const teams=node('div','more-opponent');
+  const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
+  teams.append(node('strong','',shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames)));
+  teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')));
+  const score=node('div','more-match-score',String(r.setsA)+' : '+String(r.setsB));
   const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
   if(points)score.append(node('small','','('+points+')'));
-  row.append(node('span','more-match-symbol',r.won?'🏆':'🏸'),opponent,score);host.append(row);
+  row.append(node('span','more-match-symbol','🏸'),teams,score);
+  host.append(row);
  }
 }
 function statusView(status,role){const isAdmin=role==='owner'||role==='admin';const approved=isAdmin||status==='approved';const account=$('accountCard');if(approved){$('accountMount').append(account)}else{$('signedArea').insertBefore(account,$('approvedArea'))}show('pending',!approved&&status==='pending');show('rejected',!approved&&status==='rejected');show('approvedArea',approved);show('bottomNav',approved);$('profileStatus').textContent=role==='owner'?'👑 Vlasnik aplikacije · pristup odobren':isAdmin?'🛡️ Administrator · pristup odobren':approved?'✅ Odobren igrač':status==='rejected'?'❌ Odbijen zahtjev':'⏳ Čeka odobrenje';$('profileStatus').className='notice '+(approved?'good':status==='rejected'?'bad':'warn');show('uidArea',!isAdmin);if(approved)navigate('home')}
