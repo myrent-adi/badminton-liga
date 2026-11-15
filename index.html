@@ -442,6 +442,11 @@ body.modal-open{overflow:hidden}
 .next-training-card .datebig{font-size:clamp(18px,4.5vw,23px);font-weight:850;line-height:1.4;letter-spacing:-.015em}
 .next-training-badge{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:6px 11px;font-weight:850;font-size:12px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);white-space:nowrap}
 @media(max-width:360px){.next-training-card .datebig{font-size:18px}.next-training-badge{padding:5px 8px;font-size:11px}}
+.next-training-card .datebig{font-size:clamp(19px,4.7vw,24px);line-height:1.35;font-weight:850;letter-spacing:-.025em}
+.next-training-time{display:inline-flex;align-items:center;gap:10px;margin-top:13px;padding:10px 13px;border-radius:13px;background:var(--accent-soft);border:1px solid var(--line);color:var(--ink);font-size:clamp(17px,4.2vw,21px);font-weight:850;letter-spacing:.015em}
+.next-training-clock{display:inline-grid;place-items:center;color:var(--accent);flex-shrink:0}
+.next-training-clock svg{width:23px;height:23px}
+@media(max-width:370px){.next-training-card .datebig{font-size:18px}.next-training-time{font-size:17px;padding:9px 11px}}
 </style>
 </head>
 <body>
@@ -476,7 +481,7 @@ body.modal-open{overflow:hidden}
 <section class="card" id="accountCard"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div><button type="button" class="button secondary" id="logout">Odjava</button></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div></section>
 <div id="approvedArea" class="hidden">
 <section class="section active" id="screen-home">
-<div class="card next-training-card"><div class="next-training-heading"><span class="eyeline">▣ Sljedeći trening</span><span class="next-training-badge hidden" id="nextTrainingBadge"></span></div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div></div>
+<div class="card next-training-card"><div class="next-training-heading"><span class="eyeline">▣ Sljedeći trening</span><span class="next-training-badge hidden" id="nextTrainingBadge"></span></div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><div class="next-training-time hidden" id="nextTrainingTime"><span class="next-training-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span id="nextTimeText">18:00 – 20:00</span></div></div>
 <div class="card"><div class="between attendance-heading"><h2><span aria-hidden="true">👥</span><span>Dolaznost na trening</span></h2><button type="button" class="home-attendance-open" id="homeMemberCount" aria-live="polite" title="Otvori dolaznost sljedećeg treninga" disabled>Učitavanje prijava…</button></div><div class="stats"><div class="stat go"><b id="homeYesCount">–</b><span>Dolaze</span></div><div class="stat no"><b id="homeNoCount">–</b><span>Ne dolaze</span></div><div class="stat maybe"><b id="homeMaybeCount">–</b><span>Možda</span></div><div class="stat"><b id="homePendingCount">–</b><span>Bez odgovora</span></div></div></div>
 <div class="mini-nav" style="margin-bottom:13px"><button class="tile" data-go="results"><span class="icon">🏆</span>Rezultati</button><button class="tile" id="homeAddResult"><span class="icon">🏸</span>Dodaj rezultat</button></div>
 <div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2></div><div id="homeRecentResults"><div class="hint">Učitavanje rezultata…</div></div></div>
@@ -1111,7 +1116,9 @@ function renderTrainings(run){
   const weekday=new Intl.DateTimeFormat('hr-HR',{weekday:'long',timeZone:'UTC'}).format(date);
   const fullWeekday=weekday.charAt(0).toLocaleUpperCase('hr-HR')+weekday.slice(1);
   const timeText=upcoming.start+' – '+upcoming.end;
-  $('nextDate').textContent=fullWeekday+', '+day+'. '+month+'. · '+timeText;
+  $('nextDate').textContent=fullWeekday+'. '+String(day).padStart(2,'0')+'.'+String(month).padStart(2,'0')+'.'+year+'.';
+  $('nextTimeText').textContent=timeText;
+  show('nextTrainingTime',true);
   const now=new Date();
   const dateInZagreb=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zagreb',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
   const parts=Object.fromEntries(dateInZagreb.filter(x=>x.type!=='literal').map(x=>[x.type,Number(x.value)]));
@@ -1121,6 +1128,7 @@ function renderTrainings(run){
   show('nextTrainingBadge',!!badgeText);
  }else{
   $('nextDate').textContent='Trenutačno nije objavljen';
+  show('nextTrainingTime',false);
   show('nextTrainingBadge',false);
  }
  setHomeTraining(upcoming);
