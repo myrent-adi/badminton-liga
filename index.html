@@ -648,6 +648,13 @@ body.preview-player #uidArea{display:none!important}
 .reject-member-actions .button{font-size:15px;min-height:50px;padding:9px 6px}
 .reject-member-actions #rejectMemberConfirm{background:var(--redbg);border:1px solid var(--red);color:var(--red)}
 @media(max-width:350px){.reject-member-dialog{padding:21px 14px 16px}.reject-member-actions{gap:7px}}
+
+/* Keep destructive member actions out of the default approval card. */
+#admin .admin-member-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+#admin .admin-member-actions:has(>button:only-child){grid-template-columns:1fr}
+#admin .admin-member-actions .admin-member-edit{background:var(--accent-soft);color:var(--ink);border:1px solid var(--line)}
+#admin .admin-member-extra{margin-top:10px;padding:11px;border:1px solid var(--line);background:var(--panel2);border-radius:12px}
+#admin .admin-member-extra .admin-reject{display:block;width:100%;min-height:45px;font-size:13px;font-weight:850;border:1px solid var(--red);background:var(--redbg);color:var(--red)}
 </style>
 </head>
 <body>
@@ -1934,9 +1941,22 @@ function showAdminUsers(snapshot){
    const b=node('button','button admin-approve','✓ Odobri');b.type='button';b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b);
   }
   if(user.status!=='rejected'){
-   const b=node('button','button danger admin-reject','Odbij');b.type='button';b.addEventListener('click',()=>changeStatus(user.id,'rejected',b));actions.append(b);
-  }
-  if(actions.children.length)row.append(actions);
+   const edit=node('button','button secondary admin-member-edit','✏️ Uredi');
+   edit.type='button';edit.setAttribute('aria-expanded','false');
+   edit.setAttribute('aria-label','Prikaži dodatne radnje za '+displayName);
+   const extra=node('div','admin-member-extra hidden');
+   const reject=node('button','button danger admin-reject','✕ Odbij pristup');
+   reject.type='button';
+   reject.addEventListener('click',()=>changeStatus(user.id,'rejected',reject));
+   extra.append(reject);
+   edit.addEventListener('click',()=>{
+    const expanded=extra.classList.contains('hidden');
+    extra.classList.toggle('hidden',!expanded);
+    edit.setAttribute('aria-expanded',String(expanded));
+    edit.textContent=expanded?'✕ Zatvori':'✏️ Uredi';
+   });
+   actions.append(edit);row.append(actions,extra);
+  }else if(actions.children.length)row.append(actions);
   host.append(row);
  }
 }
