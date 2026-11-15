@@ -703,6 +703,19 @@ body.preview-player #uidArea{display:none!important}
  #resultModal .result-side-symbol{background:#174f78}
  #resultModal .result-opponents-side .result-side-symbol{background:#6b2b3e}
 }
+
+/* Player result visibility preferences. */
+.privacy-setting{border:1px solid var(--line);border-radius:14px;padding:15px;margin:12px 0 18px;background:var(--panel2)}
+.privacy-setting-top{display:flex;gap:11px;align-items:center;margin-bottom:14px}
+.privacy-setting-top>div{display:flex;flex-direction:column;gap:5px}
+.privacy-setting-top strong,.privacy-setting>strong{font-size:15px;color:var(--ink)}
+.privacy-setting-top small,.privacy-setting small{font-size:12px;color:var(--muted);line-height:1.5}
+.privacy-icon{font-size:26px}
+.privacy-switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:14px;font-weight:800;line-height:1.4;color:var(--ink)}
+.privacy-switch-row input{width:23px;height:23px;min-width:23px;accent-color:#086bd3}
+.privacy-setting>p{margin:11px 0 0;font-size:12px;line-height:1.5}
+#editPlayerPrivacySetting .privacy-switch-row{margin:14px 0 8px}
+#editPlayerPrivacySetting input:disabled{opacity:.5}
 </style>
 </head>
 <body>
@@ -811,6 +824,11 @@ body.preview-player #uidArea{display:none!important}
 <div class="card players-roster-card"><p id="playersCount" class="player-count" aria-live="polite">Učitavanje popisa…</p><div id="playersList" class="player-list"></div></div><div class="training-modal-overlay hidden" id="editPlayerCard" aria-hidden="true"><div class="training-modal player-fullscreen" role="dialog" aria-modal="true" aria-labelledby="editPlayerTitle"><div class="training-modal-head"><h2 id="editPlayerTitle">✏️ Uredi igrača</h2><button type="button" class="training-modal-close" id="closeEditPlayerModal" aria-label="Zatvori uređivanje igrača">×</button></div><form id="editPlayerForm"><label class="field">Ime i prezime<input id="editPlayerName" maxlength="80" required autocomplete="off"></label>
 <label class="field">Povezani Google račun<select id="editPlayerGoogle"><option value="">Bez Google računa</option></select></label>
 <p class="muted small">Odaberi račun tek nakon što potvrdiš da pripada ovom igraču. Rezultati igrača ostaju spremljeni.</p>
+<div class="privacy-setting" id="editPlayerPrivacySetting">
+ <strong>🔒 Privatnost rezultata</strong>
+ <label class="privacy-switch-row"><span>Prikaži mečeve ovog igrača drugima</span><input id="editPlayerResultsVisible" type="checkbox"></label>
+ <small id="editPlayerPrivacyHelp" class="muted">Za igrača bez Google računa ovu odluku evidentira administrator uz njegov pristanak.</small>
+</div>
 <div id="editPlayerRoleActions" class="player-role-actions hidden"></div>
 <div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div></div><div class="training-modal-overlay hidden" id="playersAdmin" aria-hidden="true"><div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle"><div class="training-modal-head"><h2 id="playerModalTitle">➕ Dodaj igrača</h2><button type="button" class="training-modal-close" id="closePlayerModal" aria-label="Zatvori dodavanje igrača">×</button></div><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Google račun možeš povezati kasnije kroz Uredi igrača.</p></div></div></section>
 <section class="section" id="screen-more">
@@ -818,7 +836,14 @@ body.preview-player #uidArea{display:none!important}
 <div id="moreOverview">
 <div class="more-menu"><button class="more-menu-button" id="moreShowStats" type="button"><span class="more-menu-symbol">▥</span> Statistika <span class="more-chevron">›</span></button><button class="more-menu-button" id="moreShowAbout" type="button"><span class="more-menu-symbol">ⓘ</span> O aplikaciji <span class="more-chevron">›</span></button></div>
 <div id="ownerPreviewPanel" class="card owner-preview-panel hidden"><h2>👁️ Probni prikaz</h2><p class="muted">Pregledaj aplikaciju kao običan igrač, bez drugog Google računa. Ovo mijenja samo izgled, ne Firebase ovlasti.</p><button id="ownerPreviewToggle" type="button" class="button full">👁️ Prikaži kao igrač</button></div>
-<div class="card"><h2>Postavke</h2><div class="entry"><strong>Izgled aplikacije</strong><small>Prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju.</small></div></div>
+<div class="card"><h2>Postavke</h2>
+<div class="privacy-setting" id="myPrivacySetting">
+ <div class="privacy-setting-top"><span class="privacy-icon">🔒</span><div><strong>Privatnost rezultata</strong><small>Ti odlučuješ hoće li drugi vidjeti tvoje mečeve.</small></div></div>
+ <label class="privacy-switch-row"><span>Prikaži moje rezultate drugim igračima</span><input id="myResultsVisible" type="checkbox" aria-describedby="myPrivacyHelp"></label>
+ <p class="muted small" id="myPrivacyHelp">Isključi za skrivanje svojih mečeva iz zajedničkog pregleda. Tvoji spremljeni mečevi ostaju sačuvani.</p>
+ <p id="myPrivacyFeedback" class="muted small" aria-live="polite"></p>
+</div>
+<div class="entry"><strong>Izgled aplikacije</strong><small>Prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju.</small></div></div>
 <div id="admin" class="card hidden"><div class="admin-section-heading"><span class="admin-section-icon" aria-hidden="true">👥</span><div><h2 id="adminHeading">👑 Upravljanje članovima</h2><p class="muted">Pregledaj prijave i upravljaj pristupom.</p></div></div><div id="adminCount" class="admin-summary" aria-live="polite">Učitavanje…</div><div id="userRows" class="admin-user-list"></div></div>
 <div id="accountMount"></div>
 </div>
@@ -902,9 +927,41 @@ $('moreShowAbout').addEventListener('click',()=>openMoreSection('about'));
 document.querySelectorAll('[data-more-back]').forEach(button=>button.addEventListener('click',()=>openMoreSection('overview')));
 $('morePhoto').addEventListener('error',()=>{show('morePhoto',false);show('moreInitials',true)});
 function myLinkedPlayer(){return playersCache.find(p=>p.linkedUid===auth.currentUser?.uid)||null}
+let resultPrivacyCache={};
+function privacyIdForUser(){const user=auth.currentUser;return user?(myLinkedPlayer()?.id||'google_'+user.uid):null}
+function isPlayerResultPublic(id){return resultPrivacyCache[String(id)]!==false}
+function resultHasHiddenPlayer(r){
+ return [...(Array.isArray(r.teamA)?r.teamA:[]),...(Array.isArray(r.teamB)?r.teamB:[])].some(id=>!isPlayerResultPublic(id));
+}
+function canSeeSharedMatch(r){
+ return !resultHasHiddenPlayer(r);
+}
+function refreshMyPrivacy(){
+ const uid=privacyIdForUser(),checkbox=$('myResultsVisible'),feedback=$('myPrivacyFeedback');
+ checkbox.disabled=!uid;
+ checkbox.checked=uid?isPlayerResultPublic(uid):false;
+ $('myPrivacyHelp').textContent=uid?'Isključivanjem tvoji mečevi nestaju sa zajedničkih stranica Rezultati i Početna. U svojoj statistici ih i dalje vidiš.':'Prijavi se Google računom kako bi upravljao privatnošću.';
+ if(!uid)feedback.textContent='';
+}
+async function saveResultVisibility(id,visible){
+ await setDoc(doc(db,'resultPrivacy',id),{visible:!!visible});
+ resultPrivacyCache[id]=!!visible;
+ renderResults();renderMoreStats();
+}
+$('myResultsVisible').addEventListener('change',async event=>{
+ const input=event.currentTarget,id=privacyIdForUser();
+ if(!id)return;
+ const target=input.checked;input.disabled=true;$('myPrivacyFeedback').textContent='Spremanje postavke…';
+ try{
+  await saveResultVisibility(id,target);
+  $('myPrivacyFeedback').textContent=target?'✅ Tvoji mečevi vidljivi su ostalim igračima.':'🔒 Tvoji mečevi skriveni su iz zajedničkog pregleda.';
+ }catch(error){input.checked=!target;$('myPrivacyFeedback').textContent=readableError(error)}
+ finally{input.disabled=false}
+});
 function renderMoreProfile(){
  const user=auth.currentUser;if(!user)return;
  const name=myLinkedPlayer()?.name||user.displayName||'Google korisnik';
+ refreshMyPrivacy();
  $('moreName').textContent=name;
  const created=user.metadata?.creationTime?new Date(user.metadata.creationTime):null;
  $('moreSince').textContent=created&&!isNaN(created)?'🏸 U aplikaciji od '+new Intl.DateTimeFormat('hr-HR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Europe/Zagreb'}).format(created):'🏸 Član zajednice';
@@ -942,7 +999,7 @@ function groupMatchRate(matches){
  return {count:straight,total:completed.length,percentage:completed.length?Math.round(100*straight/completed.length):0};
 }
 function renderMoreStats(){
- const all=resultsCache.filter(r=>r&&r.date&&(r.type==='singles'||r.type==='doubles'));
+ const all=resultsCache.filter(r=>r&&r.date&&(r.type==='singles'||r.type==='doubles')&&canSeeSharedMatch(r));
  const filtered=groupStatsType==='all'?all:all.filter(r=>r.type===groupStatsType);
  const ids=new Set(),names=new Set();
  for(const r of filtered){
@@ -969,10 +1026,12 @@ function renderMoreStats(){
  for(const r of recent){
   const row=node('div','more-match-row');
   const teams=node('div','more-opponent');
-  const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
+  const shortTeam=(names,ids)=>(Array.isArray(names)&&names.length?names:['Tim']).map((name,index)=>shortResultPlayerName(ids?.[index]&&!isPlayerResultPublic(ids[index])&&ids[index]!==privacyIdForUser()?'Privatni igrač':name)).join(' / ');
   const myTeam=r.meOnA?r.teamANames:r.teamBNames;
   const otherTeam=r.meOnA?r.teamBNames:r.teamANames;
-  teams.append(node('strong','',shortTeam(myTeam)+' – '+shortTeam(otherTeam)));
+  const myIds=r.meOnA?r.teamA:r.teamB;
+  const otherIds=r.meOnA?r.teamB:r.teamA;
+  teams.append(node('strong','',shortTeam(myTeam,myIds)+' – '+shortTeam(otherTeam,otherIds)));
   teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')+(r.interrupted===true?' · Prekinuto':'')));
   const personalWon=r.won;
   const myScore=r.meOnA?String(r.setsA)+' : '+String(r.setsB):String(r.setsB)+' : '+String(r.setsA);
@@ -1198,6 +1257,11 @@ function beginEditPlayer(id){
   editingPlayerId=id;$('editPlayerName').value=player.name||'';$('editPlayerFeedback').textContent='';
   populatePlayerGoogleSelect(player);
   renderPlayerRoleActions(player);
+  const privacyInput=$('editPlayerResultsVisible');
+  privacyInput.checked=isPlayerResultPublic(player.id);
+  const linked=!!player.linkedUid;
+  privacyInput.disabled=linked;
+  $('editPlayerPrivacyHelp').textContent=linked?'Ovaj igrač ima Google račun i sam podešava svoju privatnost u Više → Postavke.':'Zabilježi odluku neregistriranog igrača uz njegov pristanak.';
   show('editPlayerCard',true);$('editPlayerCard').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');$('editPlayerName').focus();
 }
 function finishEditPlayer(){
@@ -1233,6 +1297,8 @@ $('editPlayerForm').addEventListener('submit',async event=>{
   button.disabled=true;feedback.textContent='Spremanje…';
   try{
    await updateDoc(doc(db,'players',editingPlayerId),changes);
+   if(!player.linkedUid&&$('editPlayerResultsVisible').checked!==isPlayerResultPublic(player.id))
+    await saveResultVisibility(player.id,$('editPlayerResultsVisible').checked);
    const updated={...player,name,linkedUid:linkedUid||''};
    playersCache=playersCache.map(p=>p.id===editingPlayerId?updated:p);
    renderPlayers();renderPlayerRoleActions(updated);
@@ -1865,7 +1931,7 @@ function shortResultPlayerName(fullName){
 }
 function renderResults(){renderMoreStats();
  const host=$('resultsList'),recent=$('homeRecentResults');host.replaceChildren();recent.replaceChildren();
- const sorted=[...resultsCache].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id).localeCompare(String(a.id)));
+ const sorted=resultsCache.filter(canSeeSharedMatch).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id).localeCompare(String(a.id)));
  $('resultsMonthTitle').textContent=new Intl.DateTimeFormat('hr-HR',{month:'long',year:'numeric'}).format(new Date(resultsShownYear,resultsShownMonth,1)).replace(/^./,c=>c.toLocaleUpperCase('hr'));
  const key=String(resultsShownYear)+'-'+String(resultsShownMonth+1).padStart(2,'0');
  const monthResults=sorted.filter(r=>String(r.date||'').startsWith(key));
@@ -2069,7 +2135,17 @@ onAuthStateChanged(auth,async user=>{const current=++generation;playerPreview=fa
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;renderMoreProfile();$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
 try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;show('ownerPreviewPanel',role==='owner');renderMoreProfile();if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',true);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
 const unProfile=onSnapshot(userRef,snapshot=>{if(current!==generation)return;statusView(snapshot.exists()?snapshot.data().status:'pending',role)},error=>notify(readableError(error),true));unsubscribers.push(unProfile);
-const unPlayers=onSnapshot(query(collection(db,'players')),snapshot=>{if(current!==generation)return;displayPlayers(snapshot)},error=>{if(current!==generation)return;$('playersCount').textContent=readableError(error);renderHomeAttendance()});unsubscribers.push(unPlayers);const unResults=onSnapshot(query(collection(db,'results')),snapshot=>{if(current!==generation)return;resultsCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderResults()},error=>{if(current!==generation)return;$('resultsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unResults);
+const unPlayers=onSnapshot(query(collection(db,'players')),snapshot=>{if(current!==generation)return;displayPlayers(snapshot)},error=>{if(current!==generation)return;$('playersCount').textContent=readableError(error);renderHomeAttendance()});unsubscribers.push(unPlayers);const unPrivacy=onSnapshot(collection(db,'resultPrivacy'),snapshot=>{
+ if(current!==generation)return;
+ resultPrivacyCache=Object.fromEntries(snapshot.docs.map(d=>[d.id,d.data().visible!==false]));
+ refreshMyPrivacy();renderResults();renderPlayers();
+ if(!$('editPlayerCard').classList.contains('hidden')){
+  const player=playersCache.find(p=>p.id===editingPlayerId);
+  if(player&&!player.linkedUid)$('editPlayerResultsVisible').checked=isPlayerResultPublic(player.id);
+ }
+},error=>{if(current!==generation)return;notify('Postavke privatnosti nisu učitane: '+readableError(error),true)});
+unsubscribers.push(unPrivacy);
+const unResults=onSnapshot(query(collection(db,'results')),snapshot=>{if(current!==generation)return;resultsCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderResults()},error=>{if(current!==generation)return;$('resultsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unResults);
 const unTrainings=onSnapshot(query(collection(db,'trainings')),snapshot=>{if(current!==generation)return;trainingCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderTrainings(current)},error=>{if(current!==generation)return;$('trainingsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unTrainings);const unAdmins=onSnapshot(collection(db,'admins'),snapshot=>{
  playerAdminRoles=Object.fromEntries(snapshot.docs.map(d=>[d.id,d.data().role]));
  renderPlayers();renderMoreProfile();
