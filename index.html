@@ -557,6 +557,15 @@ body.preview-player #uidArea{display:none!important}
 /* Logout is the final action in More, full width and easy to tap. */
 #accountMount #accountCard{margin-top:13px;margin-bottom:0}
 #accountCard #logout{display:block;width:100%;min-height:50px;margin-top:16px;text-align:center;font-size:16px;font-weight:850}
+
+/* Player add and edit flows occupy the whole mobile viewport. */
+#editPlayerCard,#playersAdmin{inset:0;width:100%;height:100vh;height:100dvh;padding:0;background:var(--bg);align-items:stretch;justify-content:stretch;z-index:125}
+#editPlayerCard>.training-modal,#playersAdmin>.training-modal{width:100%;max-width:none;min-height:100vh;height:100vh;min-height:100dvh;height:100dvh;max-height:none;overflow-y:auto;overscroll-behavior:contain;border:0;border-radius:0;box-shadow:none;background:var(--bg);padding:max(18px,env(safe-area-inset-top)) max(17px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(17px,env(safe-area-inset-left));-webkit-overflow-scrolling:touch}
+#editPlayerCard .training-modal-head,#playersAdmin .training-modal-head{position:sticky;top:0;z-index:2;background:var(--bg);padding:7px 0 14px;margin-bottom:17px}
+#editPlayerCard .field input,#editPlayerCard .field select,#playersAdmin .field input{font-size:16px;min-height:50px}
+#editPlayerCard .actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:22px}
+#editPlayerCard .actions .button,#playersAdmin #savePlayer{width:100%;min-height:50px;font-size:16px}
+#playersAdmin #savePlayer{margin-top:15px}
 </style>
 </head>
 <body>
@@ -661,11 +670,11 @@ body.preview-player #uidArea{display:none!important}
 <button type="button" id="playerTabActive" class="player-status-tab active" role="tab" aria-selected="true">✅ Aktivni <span id="playerActiveCount">0</span></button>
 <button type="button" id="playerTabInactive" class="player-status-tab" role="tab" aria-selected="false">⏸️ Neaktivni <span id="playerInactiveCount">0</span></button>
 </div>
-<div class="card players-roster-card"><p id="playersCount" class="player-count" aria-live="polite">Učitavanje popisa…</p><div id="playersList" class="player-list"></div></div><div class="card hidden" id="editPlayerCard"><h2>✏️ Uredi igrača</h2><form id="editPlayerForm"><label class="field">Ime i prezime<input id="editPlayerName" maxlength="80" required autocomplete="off"></label>
+<div class="card players-roster-card"><p id="playersCount" class="player-count" aria-live="polite">Učitavanje popisa…</p><div id="playersList" class="player-list"></div></div><div class="training-modal-overlay hidden" id="editPlayerCard" aria-hidden="true"><div class="training-modal player-fullscreen" role="dialog" aria-modal="true" aria-labelledby="editPlayerTitle"><div class="training-modal-head"><h2 id="editPlayerTitle">✏️ Uredi igrača</h2><button type="button" class="training-modal-close" id="closeEditPlayerModal" aria-label="Zatvori uređivanje igrača">×</button></div><form id="editPlayerForm"><label class="field">Ime i prezime<input id="editPlayerName" maxlength="80" required autocomplete="off"></label>
 <label class="field">Povezani Google račun<select id="editPlayerGoogle"><option value="">Bez Google računa</option></select></label>
 <p class="muted small">Odaberi račun tek nakon što potvrdiš da pripada ovom igraču. Rezultati igrača ostaju spremljeni.</p>
 <div id="editPlayerRoleActions" class="player-role-actions hidden"></div>
-<div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div><div class="training-modal-overlay hidden" id="playersAdmin" aria-hidden="true"><div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle"><div class="training-modal-head"><h2 id="playerModalTitle">➕ Dodaj igrača</h2><button type="button" class="training-modal-close" id="closePlayerModal" aria-label="Zatvori dodavanje igrača">×</button></div><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Google račun možeš povezati kasnije kroz Uredi igrača.</p></div></div></section>
+<div class="actions"><button id="savePlayerEdit" class="button" type="submit">Spremi promjenu</button><button id="cancelPlayerEdit" class="button secondary" type="button">Odustani</button></div></form><p id="editPlayerFeedback" class="muted" role="status" aria-live="polite"></p></div></div><div class="training-modal-overlay hidden" id="playersAdmin" aria-hidden="true"><div class="training-modal" role="dialog" aria-modal="true" aria-labelledby="playerModalTitle"><div class="training-modal-head"><h2 id="playerModalTitle">➕ Dodaj igrača</h2><button type="button" class="training-modal-close" id="closePlayerModal" aria-label="Zatvori dodavanje igrača">×</button></div><p class="muted">Samo vlasnik i administratori mogu dodavati igrače. Google račun nije obavezan.</p><form id="playerForm"><label class="field">Ime i prezime<input id="playerName" name="playerName" maxlength="80" autocomplete="off" required placeholder="Npr. Ivica Terzić"></label><button type="submit" class="button" id="savePlayer">Spremi igrača</button></form><p class="muted" id="playerFormFeedback" role="status" aria-live="polite"></p><p class="muted small">Prije dodavanja provjeri je li igrač već na popisu. Google račun možeš povezati kasnije kroz Uredi igrača.</p></div></div></section>
 <section class="section" id="screen-more">
 <div class="more-profile" id="moreProfileCard"><div class="more-photo"><span id="moreInitials">🏸</span><img id="morePhoto" class="hidden" alt="Google profilna fotografija" referrerpolicy="no-referrer"></div><div class="more-profile-copy"><strong id="moreName">Igrač</strong><span id="moreSince">🏸 Član zajednice</span><span id="moreRole">Igrač</span></div></div>
 <div id="moreOverview">
@@ -716,7 +725,7 @@ const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle(
 function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[];trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];if(homeVotesUnsub){homeVotesUnsub();homeVotesUnsub=null}homeTrainingId=null;homeVotes=[];approvedGoogleUserIds=null}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
-function navigate(name){if(name==='more')openMoreSection('overview');if(name!=='players')closePlayerModal();if(name!=='trainings')closeAttendanceModal();if(name!=='results')closeResultModal();document.body.classList.toggle('subpage',name!=='home');document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
+function navigate(name){if(name==='more')openMoreSection('overview');if(name!=='players'){closePlayerModal();finishEditPlayer()}if(name!=='trainings')closeAttendanceModal();if(name!=='results')closeResultModal();document.body.classList.toggle('subpage',name!=='home');document.querySelectorAll('.section').forEach(el=>el.classList.toggle('active',el.id==='screen-'+name));document.querySelectorAll('.nav-button').forEach(el=>{const active=el.dataset.go===name;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current')});window.scrollTo({top:0,behavior:'instant'})}
 document.querySelectorAll('[data-go]').forEach(button=>button.addEventListener('click',()=>navigate(button.dataset.go)));
 $('login').addEventListener('click',async()=>{const button=$('login');button.disabled=true;notify('');try{await signInWithPopup(auth,provider)}catch(error){notify(readableError(error),true)}finally{button.disabled=false}});
 $('logout').addEventListener('click',async()=>{try{await signOut(auth)}catch(error){notify(readableError(error),true)}});
@@ -731,7 +740,7 @@ function setPlayerPreview(enabled){
   $('profileStatus').textContent='✅ Odobren igrač · probni prikaz';
   playerEditMode=false;trainingEditMode=false;resultEditMode=false;
   updatePlayerEditModeButton();updateTrainingEditModeButton();updateResultEditModeButton();
-  closeResultModal();closeTrainingModal();closePlayerModal();closeTrainingEdit();
+  closeResultModal();closeTrainingModal();closePlayerModal();finishEditPlayer();closeTrainingEdit();
  }else if(currentRole==='owner'){
   $('profileStatus').textContent='👑 Vlasnik aplikacije · pristup odobren';
  }
@@ -1015,10 +1024,25 @@ function beginEditPlayer(id){
   editingPlayerId=id;$('editPlayerName').value=player.name||'';$('editPlayerFeedback').textContent='';
   populatePlayerGoogleSelect(player);
   renderPlayerRoleActions(player);
-  show('editPlayerCard',true);$('editPlayerCard').scrollIntoView({behavior:'smooth',block:'center'});$('editPlayerName').focus();
+  show('editPlayerCard',true);$('editPlayerCard').setAttribute('aria-hidden','false');document.body.classList.add('modal-open');$('editPlayerName').focus();
 }
-function finishEditPlayer(){editingPlayerId=null;show('editPlayerCard',false);$('editPlayerFeedback').textContent=''}
+function finishEditPlayer(){
+ editingPlayerId=null;show('editPlayerCard',false);$('editPlayerCard').setAttribute('aria-hidden','true');$('editPlayerFeedback').textContent='';
+ if($('trainingModal').classList.contains('hidden')&&$('attendanceModal').classList.contains('hidden')&&$('resultModal').classList.contains('hidden')&&$('playersAdmin').classList.contains('hidden'))document.body.classList.remove('modal-open');
+}
 $('cancelPlayerEdit').addEventListener('click',finishEditPlayer);
+$('closeEditPlayerModal').addEventListener('click',finishEditPlayer);
+$('editPlayerCard').addEventListener('click',event=>{if(event.target===$('editPlayerCard'))finishEditPlayer()});
+document.addEventListener('keydown',event=>{
+ if($('editPlayerCard').classList.contains('hidden'))return;
+ if(event.key==='Escape'){event.preventDefault();finishEditPlayer();return}
+ if(event.key!=='Tab')return;
+ const nodes=[...$('editPlayerCard').querySelectorAll('button:not(:disabled),input:not(:disabled),select:not(:disabled)')].filter(el=>el.offsetParent!==null);
+ if(!nodes.length)return;
+ if(event.shiftKey&&document.activeElement===nodes[0]){event.preventDefault();nodes[nodes.length-1].focus()}
+ else if(!event.shiftKey&&document.activeElement===nodes[nodes.length-1]){event.preventDefault();nodes[0].focus()}
+});
+document.body.appendChild($('editPlayerCard'));
 $('editPlayerForm').addEventListener('submit',async event=>{
   event.preventDefault();const feedback=$('editPlayerFeedback'),button=$('savePlayerEdit');
   if(!['owner','admin'].includes(currentRole)||!editingPlayerId){feedback.textContent='Nema dopuštenja za uređivanje.';return}
