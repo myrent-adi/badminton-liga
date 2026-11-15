@@ -1106,7 +1106,7 @@ function renderAttendanceModal(){
   if(!selected.length){list.append(node('p','attendance-empty','Nema igrača u ovoj skupini.'));return}
   for(const {name,choice} of selected){
    const row=node('div','attendance-player-row'),left=node('div','attendance-player-left');
-   const initials=name.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
+   const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
    left.append(node('span','attendance-avatar',initials),node('span','attendance-player-name',name));
    const status=choice==='yes'?['✓ Dolazi','yes']:choice==='no'?['✕ Ne dolazi','no']:choice==='maybe'?['? Možda','maybe']:['— Bez odgovora','pending'];
    row.append(left,node('span','attendance-state '+status[1],status[0]));
