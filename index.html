@@ -531,10 +531,7 @@ body.preview-player .training-admin-actions,
 body.preview-player .result-edit-button,
 body.preview-player .player-admin-actions,
 body.preview-player .player-role-badge.owner,
-body.preview-player #homeAddResult,
 body.preview-player #uidArea{display:none!important}
-body.preview-player #screen-home .mini-nav{grid-template-columns:1fr}
-body.preview-player #screen-home .mini-nav .tile:first-child{width:100%}
 </style>
 </head>
 <body>
@@ -1480,7 +1477,7 @@ function updateResultPreview(){
  else box.textContent='Unesi dva seta (svaki ima pobjednika). Za rezultat 2:1 dodaj treći set.';
 }
 $('resultAddSet').addEventListener('click',()=>{$('resultSetRows').append(buildResultSet(3));show('resultAddSet',false);updateResultPreview()});
-$('homeAddResult').addEventListener('click',()=>{navigate('results');if(['owner','admin'].includes(currentRole))openResultModal()});
+$('homeAddResult').addEventListener('click',()=>{navigate('results');openResultModal()});
 function addResultPlayerFallback(selectId,playerId,playerName){
  if(!playerId)return;
  const select=$(selectId);
@@ -1516,7 +1513,7 @@ function editResult(id){
  updateResultPreview();
 }
 function openResultModal(){
- if(!['owner','admin'].includes(currentRole))return;
+ if(!auth.currentUser)return;
  resultModalReturnFocus=document.activeElement;
  editingResultId=null;$('resultModalTitle').textContent='Dodaj rezultat';$('resultSave').textContent='✓ Spremi rezultat';
  $('resultForm').reset();$('resultFeedback').textContent='';$('resultType').value='singles';
@@ -1549,7 +1546,8 @@ document.addEventListener('keydown',e=>{
 $('resultForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const msg=$('resultFeedback'),save=$('resultSave');
- if(!['owner','admin'].includes(currentRole)){msg.textContent='Samo vlasnik ili administrator može dodavati rezultate.';return}
+ if(!auth.currentUser){msg.textContent='Prijavi se za dodavanje rezultata.';return}
+ if(editingResultId&&!['owner','admin'].includes(currentRole)){msg.textContent='Samo administrator može uređivati postojeće rezultate.';return}
  const type=$('resultType').value;
  const idsA=[$('resultA1').value,...(type==='doubles'?[$('resultA2').value]:[])];
  const idsB=[$('resultB1').value,...(type==='doubles'?[$('resultB2').value]:[])];
@@ -1713,7 +1711,7 @@ for(const user of users){const row=node('div','user-row'),info=node('div'),name=
 async function changeStatus(uid,status,button){button.disabled=true;try{await updateDoc(doc(db,'users',uid),{status});notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.')}catch(error){notify(readableError(error),true)}finally{button.disabled=false}}
 onAuthStateChanged(auth,async user=>{const current=++generation;playerPreview=false;document.body.classList.remove('preview-player');show('ownerPreviewPanel',false);clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);closePlayerModal();closeResultModal();closeTrainingModal();closeAttendanceModal();closeTrainingEdit();trainingAttendanceFilter='yes';trainingEditMode=false;updateTrainingEditModeButton();playerEditMode=false;playerListTab='active';approvedPlayersGoogle=[];playerAdminRoles={};updatePlayerEditModeButton();resultEditMode=false;updateResultEditModeButton();trainingShownMonth=new Date().getMonth();trainingShownYear=new Date().getFullYear();resultsShownMonth=new Date().getMonth();resultsShownYear=new Date().getFullYear();resultsSelectedDay=null;trainingCache=[];trainingVoteData={};resultsCache=[];$('resultsList').replaceChildren(node('div','hint','Učitavanje rezultata…'));$('homeRecentResults').replaceChildren(node('div','hint','Učitavanje rezultata…'));currentRole='player';playersCache=[];$('homeMemberCount').textContent='Učitavanje prijava…';$('homeMemberCount').disabled=true;for(const id of ['homeYesCount','homeNoCount','homeMaybeCount'])$(id).textContent='–';finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;renderMoreProfile();$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
-try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;show('ownerPreviewPanel',role==='owner');renderMoreProfile();if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',isAdmin);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
+try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;show('ownerPreviewPanel',role==='owner');renderMoreProfile();if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',true);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
 const unProfile=onSnapshot(userRef,snapshot=>{if(current!==generation)return;statusView(snapshot.exists()?snapshot.data().status:'pending',role)},error=>notify(readableError(error),true));unsubscribers.push(unProfile);
 const unPlayers=onSnapshot(query(collection(db,'players')),snapshot=>{if(current!==generation)return;displayPlayers(snapshot)},error=>{if(current!==generation)return;$('playersCount').textContent=readableError(error);renderHomeAttendance()});unsubscribers.push(unPlayers);const unResults=onSnapshot(query(collection(db,'results')),snapshot=>{if(current!==generation)return;resultsCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderResults()},error=>{if(current!==generation)return;$('resultsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unResults);
 const unTrainings=onSnapshot(query(collection(db,'trainings')),snapshot=>{if(current!==generation)return;trainingCache=snapshot.docs.map(d=>({id:d.id,...d.data()}));renderTrainings(current)},error=>{if(current!==generation)return;$('trainingsList').replaceChildren(node('div','hint',readableError(error)))});unsubscribers.push(unTrainings);const unAdmins=onSnapshot(collection(db,'admins'),snapshot=>{
