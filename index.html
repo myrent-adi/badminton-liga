@@ -566,6 +566,15 @@ body.preview-player #uidArea{display:none!important}
 #editPlayerCard .actions{display:grid;grid-template-columns:1fr;gap:10px;margin-top:22px}
 #editPlayerCard .actions .button,#playersAdmin #savePlayer{width:100%;min-height:50px;font-size:16px}
 #playersAdmin #savePlayer{margin-top:15px}
+
+/* Clear owner-only role management within the full-screen player editor. */
+#editPlayerRoleActions{margin:18px 0}
+#editPlayerRoleActions .player-admin-role-card{padding:15px;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+#editPlayerRoleActions .player-admin-role-heading{display:block;font-size:16px;color:var(--ink);margin-bottom:7px}
+#editPlayerRoleActions .player-admin-role-card p{margin:0 0 13px;line-height:1.5}
+#editPlayerRoleActions .player-admin-role-card button{width:100%;min-height:48px;font-size:15px;font-weight:800}
+#editPlayerRoleActions .player-admin-role-card button:disabled{opacity:.55;cursor:not-allowed}
+#editPlayerRoleActions .player-admin-role-current{color:var(--accent)}
 </style>
 </head>
 <body>
@@ -998,26 +1007,55 @@ function populatePlayerGoogleSelect(player){
  select.value=selected;
 }
 function renderPlayerRoleActions(player){
- const host=$('editPlayerRoleActions');host.replaceChildren();show('editPlayerRoleActions',currentRole==='owner');
+ const host=$('editPlayerRoleActions');host.replaceChildren();
+ show('editPlayerRoleActions',currentRole==='owner');
  if(currentRole!=='owner')return;
- const label=node('p','muted small','Administratorsku ulogu može dodijeliti samo vlasnik. Poveži Google račun i spremi promjene prije dodjele.');
- host.append(label);
- const uid=player.linkedUid,role=uid?playerAdminRoles[uid]:null;
- if(!uid)return;
- if(role==='owner'){host.append(node('strong','','👑 Vlasnik aplikacije'));return}
- const button=node('button','button secondary',role==='admin'?'Ukloni administratorsku ulogu':'🛡️ Dodijeli admina');button.type='button';
+ const selectedUid=$('editPlayerGoogle').value;
+ const linkedUid=String(player.linkedUid||'');
+ const needsSave=selectedUid!==linkedUid;
+ const panel=node('div','player-admin-role-card');
+ panel.append(node('strong','player-admin-role-heading','🛡️ Administratorska uloga'));
+ const hint=node('p','muted small','');
+ panel.append(hint);
+ if(needsSave){
+  hint.textContent=selectedUid?'Prvo pritisni „Spremi promjenu” kako bi povezao Google račun. Zatim ovdje možeš dodijeliti admina.':'Spremi promjenu Google računa prije upravljanja ulogom.';
+  const button=node('button','button secondary','🛡️ Dodijeli admina');
+  button.type='button';button.disabled=true;
+  panel.append(button);host.append(panel);return;
+ }
+ if(!linkedUid){
+  hint.textContent='Igrač nema povezan Google račun. Bez prijave nije moguće dodijeliti administratorska prava.';
+  const button=node('button','button secondary','🛡️ Dodijeli admina');
+  button.type='button';button.disabled=true;
+  panel.append(button);host.append(panel);return;
+ }
+ const role=playerAdminRoles[linkedUid];
+ if(role==='owner'){
+  hint.textContent='Povezani Google račun već je vlasnik aplikacije.';
+  panel.append(node('strong','player-admin-role-current','👑 Vlasnik'));host.append(panel);return;
+ }
+ const isAdmin=role==='admin';
+ hint.textContent=isAdmin?'Ovaj igrač ima administratorska prava.':'Google račun je povezan. Samo vlasnik može dodijeliti administratorska prava.';
+ const button=node('button','button '+(isAdmin?'secondary':'primary-admin-role'),isAdmin?'Ukloni administratorsku ulogu':'🛡️ Dodijeli admina');
+ button.type='button';
  button.addEventListener('click',async()=>{
-  if(!confirm(role==='admin'?'Ukloniti administratorsku ulogu?':'Dodijeliti administratorsku ulogu povezanom Google korisniku?'))return;
+  if(!confirm(isAdmin?'Ukloniti administratorsku ulogu?':'Dodijeliti administratorsku ulogu ovom Google korisniku?'))return;
   button.disabled=true;
   try{
-   if(role==='admin')await deleteDoc(doc(db,'admins',uid));
-   else await setDoc(doc(db,'admins',uid),{role:'admin'});
-   notify(role==='admin'?'Administratorska uloga uklonjena.':'✅ Administrator je dodan.');
-   finishEditPlayer();
-  }catch(error){notify(readableError(error),true)}finally{button.disabled=false}
+   if(isAdmin)await deleteDoc(doc(db,'admins',linkedUid));
+   else await setDoc(doc(db,'admins',linkedUid),{role:'admin'});
+   playerAdminRoles[linkedUid]=isAdmin?undefined:'admin';
+   renderPlayerRoleActions(player);renderPlayers();
+   $('editPlayerFeedback').textContent=isAdmin?'Administratorska uloga je uklonjena.':'✅ Administrator je uspješno dodan.';
+  }catch(error){$('editPlayerFeedback').textContent=readableError(error)}
+  finally{button.disabled=false}
  });
- host.append(button);
+ panel.append(button);host.append(panel);
 }
+$('editPlayerGoogle').addEventListener('change',()=>{
+ const player=playersCache.find(p=>p.id===editingPlayerId);
+ if(player)renderPlayerRoleActions(player);
+});
 function beginEditPlayer(id){
   if(!['owner','admin'].includes(currentRole))return;
   const player=playersCache.find(p=>p.id===id);if(!player)return;
@@ -1057,7 +1095,13 @@ $('editPlayerForm').addEventListener('submit',async event=>{
   const changes={name};
   if(linkedUid!==String(player.linkedUid||''))changes.linkedUid=linkedUid||deleteField();
   button.disabled=true;feedback.textContent='Spremanje…';
-  try{await updateDoc(doc(db,'players',editingPlayerId),changes);finishEditPlayer();notify('✅ Profil igrača je ažuriran.')}
+  try{
+   await updateDoc(doc(db,'players',editingPlayerId),changes);
+   const updated={...player,name,linkedUid:linkedUid||''};
+   playersCache=playersCache.map(p=>p.id===editingPlayerId?updated:p);
+   renderPlayers();renderPlayerRoleActions(updated);
+   feedback.textContent=linkedUid&&linkedUid!==String(player.linkedUid||'')&&currentRole==='owner'?'✅ Google račun je povezan. Sada možeš dodijeliti admina ispod.':'✅ Profil igrača je ažuriran.';
+ }
   catch(error){feedback.textContent=readableError(error)}
   finally{button.disabled=false}
 });
