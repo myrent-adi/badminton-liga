@@ -1285,7 +1285,7 @@ function renderTrainings(run){
      if(!auth.currentUser)return;
      if(trainingHasEnded(t)){notify('Trening je završio. Glasanje je zatvoreno.',true);refreshTrainingExpiry();return}
      responses.querySelectorAll('button').forEach(b=>b.disabled=true);
-     try{const token=await auth.currentUser.getIdTokenResult();const googleName=typeof token.claims.name==='string'?token.claims.name.trim():'';const vote={choice:value,updatedAt:serverTimestamp()};if(googleName)vote.displayName=googleName;await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),vote)}
+     try{const token=await auth.currentUser.getIdTokenResult();const googleName=typeof token.claims.name==='string'?token.claims.name.trim():'';const vote={choice:value,updatedAt:serverTimestamp()};const previous=trainingVoteData[t.id]?.votes?.find(v=>v.id===auth.currentUser.uid);if(value==='yes'&&previous?.choice==='yes'&&typeof previous.lateNote==='string'&&previous.lateNote.trim())vote.lateNote=previous.lateNote.trim();if(googleName)vote.displayName=googleName;await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),vote)}
      catch(error){notify(readableError(error),true)}
      finally{responses.querySelectorAll('button').forEach(b=>b.disabled=trainingHasEnded(t))}
     });responses.append(button);
