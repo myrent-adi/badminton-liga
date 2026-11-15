@@ -233,7 +233,7 @@ service cloud.firestore {
     }
     match /results/{resultId} {
       allow get, list: if isMember();
-      allow create: if isAdmin()
+      allow create: if isMember()
         && validResultData()
         && !request.resource.data.keys().hasAny(['updatedBy', 'updatedAt'])
         && request.resource.data.createdBy == request.auth.uid
