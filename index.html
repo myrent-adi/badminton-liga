@@ -507,6 +507,18 @@ body.modal-open{overflow:hidden}
 #trainingsList .training-event-head>div:first-child{min-width:0;flex:1}
 #trainingsList .training-attendance-open{font-size:15px;font-weight:900;min-width:61px;white-space:nowrap}
 @media(max-width:360px){#trainingsList .training-title-line strong{font-size:15px}#trainingsList .training-relative-badge{font-size:10px;padding:3px 6px}}
+
+/* Accessible training late-arrival notes, visible to every member in attendance. */
+#trainingsList .training-late-box{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+#trainingsList .training-late-trigger{background:var(--accent-soft);border:1px solid var(--line);border-radius:11px;min-height:44px;padding:9px 13px;color:var(--accent);font-size:13px;font-weight:850}
+#trainingsList .training-late-editor{margin-top:11px}
+#trainingsList .training-late-label{display:block;font-size:13px;font-weight:750;color:var(--ink)}
+#trainingsList .training-late-input{display:block;width:100%;min-height:80px;margin-top:6px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font:inherit;font-size:16px;resize:vertical}
+#trainingsList .training-late-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}
+#trainingsList .training-late-actions .button{min-height:44px;font-size:13px}
+#trainingsList .training-late-feedback{font-size:12px;margin-top:7px;color:var(--muted)}
+#attendanceModal .attendance-player-details{display:flex;min-width:0;flex-direction:column;gap:4px}
+#attendanceModal .attendance-late-note{display:block;overflow-wrap:anywhere;font-size:13px;font-weight:750;color:var(--yellow);line-height:1.4}
 </style>
 </head>
 <body>
@@ -1005,7 +1017,7 @@ document.addEventListener('keydown',event=>{
 function trainingTimeValid(start,end){return /^\d{2}:\d{2}$/.test(start)&&/^\d{2}:\d{2}$/.test(end)&&start<end}
 function trainingMonthLabel(iso){const [year,month]=String(iso).split('-').map(Number);if(!year||month<1||month>12)return 'Treninzi';return new Intl.DateTimeFormat('hr-HR',{month:'long'}).format(new Date(year,month-1,1)).replace(/^./,c=>c.toLocaleUpperCase('hr'))}
 function activePlayerTotal(){return playersCache.filter(p=>p.active===true).length}
-function formatTrainingDate(iso){const [y,m,d]=String(iso).split('-').map(Number);const date=new Date(y,m-1,d);return Number.isFinite(date.valueOf())?new Intl.DateTimeFormat('hr-HR',{weekday:'short',day:'numeric',month:'numeric'}).format(date):iso}
+function formatTrainingDate(iso){const [y,m,d]=String(iso).split('-').map(Number);const date=new Date(y,m-1,d);if(!Number.isFinite(date.valueOf()))return iso;const formatted=new Intl.DateTimeFormat('hr-HR',{weekday:'short',day:'numeric',month:'numeric'}).format(date);return formatted.charAt(0).toLocaleUpperCase('hr-HR')+formatted.slice(1)}
 $('trainingForm').addEventListener('submit',async e=>{
  e.preventDefault();const msg=$('trainingFeedback'),button=$('trainingSave');
  if(!['owner','admin'].includes(currentRole)){msg.textContent='Samo administrator može dodati trening.';return}
@@ -1078,7 +1090,7 @@ function buildAttendanceRows(votes){
  const eligible=approvedGoogleUserIds;
  const validVotes=votes.filter(v=>['yes','no','maybe'].includes(v.choice)&&(!eligible||eligible.has(v.id)));
  const rows=validVotes.map(v=>({
-  id:v.id,name:typeof v.displayName==='string'&&v.displayName.trim()?v.displayName.trim():'Google korisnik',choice:v.choice
+  id:v.id,name:typeof v.displayName==='string'&&v.displayName.trim()?v.displayName.trim():'Google korisnik',choice:v.choice,lateNote:typeof v.lateNote==='string'?v.lateNote.trim():''
  }));
  const counts={yes:rows.filter(r=>r.choice==='yes').length,no:rows.filter(r=>r.choice==='no').length,maybe:rows.filter(r=>r.choice==='maybe').length,pending:null};
  // The admin users listener supplies the approved Google accounts. Never count manual players as pending.
@@ -1118,9 +1130,11 @@ function renderAttendanceModal(){
   }
   const selected=rows.filter(r=>trainingAttendanceFilter==='all'||r.choice===trainingAttendanceFilter);
   if(!selected.length){list.append(node('p','attendance-empty','Nema igrača u ovoj skupini.'));return}
-  for(const [index,{name,choice}] of selected.entries()){
+  for(const [index,{name,choice,lateNote}] of selected.entries()){
    const row=node('div','attendance-player-row'),left=node('div','attendance-player-left');
-   left.append(node('span','attendance-player-number',String(index+1)+'.'),node('span','attendance-player-name',name));
+   const person=node('div','attendance-player-details');person.append(node('span','attendance-player-name',name));
+   if(choice==='yes'&&lateNote)person.append(node('span','attendance-late-note','⏰ '+lateNote));
+   left.append(node('span','attendance-player-number',String(index+1)+'.'),person);
    const status=choice==='yes'?['✓ Dolazi','yes']:choice==='no'?['✕ Ne dolazi','no']:choice==='maybe'?['? Možda','maybe']:['— Bez odgovora','pending'];
    row.append(left,node('span','attendance-state '+status[1],status[0]));
    list.append(row);
@@ -1277,6 +1291,50 @@ function renderTrainings(run){
     });responses.append(button);
    }
    card.append(responses);
+   const lateBox=node('div','training-late-box hidden');
+   const lateTrigger=node('button','training-late-trigger','⏰ Prijavi kašnjenje');
+   lateTrigger.type='button';lateTrigger.setAttribute('aria-expanded','false');
+   const lateEditor=node('div','training-late-editor hidden');
+   const lateLabel=node('label','training-late-label','Poruka o kašnjenju');
+   const lateText=node('textarea','training-late-input');
+   lateText.rows=2;lateText.maxLength=160;lateText.placeholder='Npr. Kasnim 10 minuta, stižem u 18:10.';
+   lateText.setAttribute('aria-label','Poruka o kašnjenju za '+formatTrainingDate(t.date));
+   const lateActions=node('div','training-late-actions');
+   const saveLate=node('button','button training-late-save','Spremi poruku');
+   saveLate.type='button';
+   const closeLate=node('button','button secondary training-late-cancel','Odustani');
+   closeLate.type='button';
+   const lateFeedback=node('div','training-late-feedback');
+   lateFeedback.setAttribute('role','status');
+   lateLabel.append(lateText);
+   lateActions.append(saveLate,closeLate);
+   lateEditor.append(lateLabel,lateActions,lateFeedback);
+   lateBox.append(lateTrigger,lateEditor);
+   lateTrigger.addEventListener('click',()=>{
+    const opening=lateEditor.classList.contains('hidden');
+    lateEditor.classList.toggle('hidden',!opening);
+    lateTrigger.setAttribute('aria-expanded',String(opening));
+    if(opening)lateText.focus();
+   });
+   closeLate.addEventListener('click',()=>{lateEditor.classList.add('hidden');lateTrigger.setAttribute('aria-expanded','false');lateFeedback.textContent=''});
+   saveLate.addEventListener('click',async()=>{
+    if(!auth.currentUser||trainingHasEnded(t)){lateFeedback.textContent='Trening je završio.';return}
+    const message=lateText.value.trim().replace(/\s+/g,' ');
+    if(message.length>160){lateFeedback.textContent='Poruka može imati najviše 160 znakova.';return}
+    saveLate.disabled=true;lateFeedback.textContent='Spremanje…';
+    try{
+     const token=await auth.currentUser.getIdTokenResult();
+     const vote={choice:'yes',updatedAt:serverTimestamp()};
+     if(typeof token.claims.name==='string'&&token.claims.name.trim())vote.displayName=token.claims.name.trim();
+     if(message)vote.lateNote=message;
+     await setDoc(doc(db,'trainings',t.id,'votes',auth.currentUser.uid),vote);
+     lateEditor.classList.add('hidden');lateTrigger.setAttribute('aria-expanded','false');
+     notify(message?'⏰ Poruka o kašnjenju je spremljena.':'Poruka o kašnjenju je uklonjena.');
+    }catch(error){lateFeedback.textContent=readableError(error)}
+    finally{saveLate.disabled=false}
+   });
+   card.append(lateBox);
+   lateBox.dataset.trainingId=t.id;
   }
   if(['owner','admin'].includes(currentRole)){
    const controls=node('div','training-admin-actions'+(trainingEditMode?'':' hidden'));
@@ -1292,6 +1350,17 @@ function renderTrainings(run){
    count.title='Otvori popis dolaznosti';
    const mine=votes.find(v=>v.id===auth.currentUser?.uid);
    responses.querySelectorAll('button').forEach(b=>{const checked=b.dataset.choice===mine?.choice;b.classList.toggle('selected',checked);b.setAttribute('aria-pressed',String(checked))});
+   const lateBox=card.querySelector('.training-late-box');
+   if(lateBox){
+    const canMessage=mine?.choice==='yes'&&t.active===true&&!trainingHasEnded(t);
+    lateBox.classList.toggle('hidden',!canMessage);
+    const trigger=lateBox.querySelector('.training-late-trigger');
+    trigger.textContent=mine?.lateNote?'⏰ Moja poruka o kašnjenju':'⏰ Prijavi kašnjenje';
+    const editor=lateBox.querySelector('.training-late-editor');
+    const textarea=lateBox.querySelector('.training-late-input');
+    if(document.activeElement!==textarea&&editor.classList.contains('hidden'))textarea.value=mine?.lateNote||'';
+    if(!canMessage){editor.classList.add('hidden');trigger.setAttribute('aria-expanded','false')}
+   }
    if(openAttendanceTrainingId===t.id)renderAttendanceModal();
   },error=>{
    trainingVoteData[t.id]={error:readableError(error)};
