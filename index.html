@@ -655,6 +655,14 @@ body.preview-player #uidArea{display:none!important}
 #admin .admin-member-actions .admin-member-edit{background:var(--accent-soft);color:var(--ink);border:1px solid var(--line)}
 #admin .admin-member-extra{margin-top:10px;padding:11px;border:1px solid var(--line);background:var(--panel2);border-radius:12px}
 #admin .admin-member-extra .admin-reject{display:block;width:100%;min-height:45px;font-size:13px;font-weight:850;border:1px solid var(--red);background:var(--redbg);color:var(--red)}
+
+/* A single edit icon beside the member-list title controls all destructive actions. */
+#admin .admin-users-heading-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px}
+#admin .admin-users-heading-row .admin-users-heading{margin:0;font-size:15px}
+#admin .admin-users-edit-toggle{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;padding:0;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);font-size:20px;cursor:pointer}
+#admin .admin-users-edit-toggle.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
+#admin .admin-pending-hint{font-size:12px;color:var(--yellow);font-weight:750;margin:0 0 10px}
+#admin .admin-member-actions{grid-template-columns:1fr}
 </style>
 </head>
 <body>
@@ -1907,6 +1915,7 @@ function renderResults(){renderMoreStats();
  }
 }
 function node(tag,cls,text){const element=document.createElement(tag);if(cls)element.className=cls;if(text!==undefined)element.textContent=text;return element}
+let adminMembersEditMode=false;
 function showAdminUsers(snapshot){
  const users=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))
   .sort((a,b)=>(a.status==='pending'?0:a.status==='rejected'?2:1)-(b.status==='pending'?0:b.status==='rejected'?2:1)||String(a.displayName||'').localeCompare(String(b.displayName||''),'hr'));
@@ -1918,13 +1927,25 @@ function showAdminUsers(snapshot){
   tile.append(node('strong','',String(count)),node('span','',label));summary.append(tile);
  }
  const host=$('userRows');host.replaceChildren();
+ const headingRow=node('div','admin-users-heading-row');
+ const heading=node('h3','admin-users-heading','Popis članova');
+ headingRow.append(heading);
+ if(users.some(u=>u.status!=='rejected')){
+  const edit=node('button','admin-users-edit-toggle'+(adminMembersEditMode?' active':''),adminMembersEditMode?'✓':'✏️');
+  edit.type='button';
+  edit.setAttribute('aria-pressed',String(adminMembersEditMode));
+  edit.setAttribute('aria-label',adminMembersEditMode?'Završi uređivanje članova':'Uredi popis članova');
+  edit.title=adminMembersEditMode?'Završi uređivanje':'Uredi članove';
+  edit.addEventListener('click',()=>{adminMembersEditMode=!adminMembersEditMode;showAdminUsers(snapshot)});
+  headingRow.append(edit);
+ }
+ host.append(headingRow);
  if(!users.length){
   const empty=node('div','admin-empty');
   empty.append(node('span','admin-empty-icon','👋'),node('strong','','Još nema registriranih igrača.'),node('span','','Kada se netko prijavi Google računom, pojavit će se ovdje.'));
   host.append(empty);return;
  }
- const heading=node('h3','admin-users-heading',pending?'Prijave članova · '+pending+' na čekanju':'Popis članova');
- host.append(heading);
+ if(pending)host.append(node('p','admin-pending-hint',pending+' '+(pending===1?'prijava čeka':'prijava čeka')+' odobrenje'));
  for(const user of users){
   const row=node('article','admin-member-card'+(user.status==='pending'?' is-pending':''));
   const top=node('div','admin-member-top');
@@ -1936,27 +1957,19 @@ function showAdminUsers(snapshot){
   const status=user.status==='approved'?['✓ Odobren','approved']:user.status==='rejected'?['✕ Odbijen','rejected']:['⏳ Čeka','pending'];
   const badge=node('span','admin-member-status '+status[1],status[0]);
   top.append(avatar,identity,badge);row.append(top);
-  const actions=node('div','admin-member-actions');
   if(user.status!=='approved'){
-   const b=node('button','button admin-approve','✓ Odobri');b.type='button';b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b);
+   const actions=node('div','admin-member-actions');
+   const approve=node('button','button admin-approve','✓ Odobri');
+   approve.type='button';approve.addEventListener('click',()=>changeStatus(user.id,'approved',approve));
+   actions.append(approve);row.append(actions);
   }
-  if(user.status!=='rejected'){
-   const edit=node('button','button secondary admin-member-edit','✏️ Uredi');
-   edit.type='button';edit.setAttribute('aria-expanded','false');
-   edit.setAttribute('aria-label','Prikaži dodatne radnje za '+displayName);
-   const extra=node('div','admin-member-extra hidden');
+  if(adminMembersEditMode&&user.status!=='rejected'){
+   const extra=node('div','admin-member-extra');
    const reject=node('button','button danger admin-reject','✕ Odbij pristup');
    reject.type='button';
    reject.addEventListener('click',()=>changeStatus(user.id,'rejected',reject));
-   extra.append(reject);
-   edit.addEventListener('click',()=>{
-    const expanded=extra.classList.contains('hidden');
-    extra.classList.toggle('hidden',!expanded);
-    edit.setAttribute('aria-expanded',String(expanded));
-    edit.textContent=expanded?'✕ Zatvori':'✏️ Uredi';
-   });
-   actions.append(edit);row.append(actions,extra);
-  }else if(actions.children.length)row.append(actions);
+   extra.append(reject);row.append(extra);
+  }
   host.append(row);
  }
 }
