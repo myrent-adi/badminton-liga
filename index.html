@@ -499,6 +499,14 @@ body.modal-open{overflow:hidden}
 #attendanceModal .attendance-player-name{font-size:16px;font-weight:800}
 #attendanceModal .attendance-filter:last-child{grid-column:1/-1}
 @media(min-width:580px){#attendanceModal .attendance-filter:last-child{grid-column:auto}}
+
+/* Training date distance labels and attendee reply fractions. */
+#trainingsList .training-title-line{display:flex;align-items:center;flex-wrap:wrap;gap:5px 9px;min-width:0}
+#trainingsList .training-title-line strong{font-size:16px}
+#trainingsList .training-relative-badge{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:var(--accent);background:var(--accent-soft);font-size:11px;font-weight:850;white-space:nowrap}
+#trainingsList .training-event-head>div:first-child{min-width:0;flex:1}
+#trainingsList .training-attendance-open{font-size:15px;font-weight:900;min-width:61px;white-space:nowrap}
+@media(max-width:360px){#trainingsList .training-title-line strong{font-size:15px}#trainingsList .training-relative-badge{font-size:10px;padding:3px 6px}}
 </style>
 </head>
 <body>
@@ -1173,6 +1181,37 @@ function refreshTrainingExpiry(){
 }
 setInterval(refreshTrainingExpiry,30000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshTrainingExpiry()});
+function trainingRelativeLabel(iso){
+ const parts=String(iso||'').split('-').map(Number);
+ if(parts.length!==3||parts.some(n=>!Number.isInteger(n)))return '';
+ const [year,month,day]=parts;
+ const nowParts=new Intl.DateTimeFormat('en-GB',{timeZone:'Europe/Zagreb',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
+ const z=Object.fromEntries(nowParts.filter(p=>p.type!=='literal').map(p=>[p.type,Number(p.value)]));
+ const todayUTC=Date.UTC(z.year,z.month-1,z.day);
+ const targetUTC=Date.UTC(year,month-1,day);
+ const diff=Math.round((targetUTC-todayUTC)/86400000);
+ if(diff<0)return '';
+ if(diff===0)return 'Danas';
+ if(diff===1)return 'Sutra';
+ if(diff===2)return 'Prekosutra';
+ if(diff<7)return 'Za '+diff+' dana';
+ if(diff<14)return 'Idući tjedan';
+ if(diff<21)return 'Za 2 tjedna';
+ const weeks=Math.round(diff/7);
+ return 'Za '+weeks+' '+(weeks>=5?'tjedana':'tjedna');
+}
+function refreshTrainingAttendanceBadges(){
+ document.querySelectorAll('#trainingsList .training-attendance-open').forEach(button=>{
+  const id=button.dataset.trainingId;
+  const votes=trainingVoteData[id]?.votes;
+  if(!votes)return;
+  const eligible=approvedGoogleUserIds;
+  const responded=new Set(votes.filter(v=>['yes','no','maybe'].includes(v.choice)&&(!eligible||eligible.has(v.id))).map(v=>v.id));
+  const total=eligible?eligible.size:null;
+  button.textContent=responded.size+'/'+(total===null?'–':total);
+  button.setAttribute('aria-label','Otvori dolaznost: '+responded.size+' od '+(total===null?'nepoznatog broja':total)+' igrača');
+ });
+}
 function renderTrainings(run){
  trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];trainingVoteData={};
  const list=$('trainingsList');list.replaceChildren();
@@ -1209,8 +1248,15 @@ function renderTrainings(run){
  for(const t of visible){
   const card=node('article','training-event'+(t.active===true?'':' is-cancelled')+(trainingHasEnded(t)?' is-finished':''));card.dataset.trainingId=t.id;
   const head=node('div','training-event-head'),details=node('div');
-  details.append(node('strong','', '▣ '+formatTrainingDate(t.date)),node('span','training-time','◷ '+t.start+' – '+t.end));
-  const count=node('button','training-attendees training-attendance-open','👥 0 prijava');
+  const dateLine=node('div','training-title-line');
+  dateLine.append(node('strong','', '▣ '+formatTrainingDate(t.date)));
+  if(t.active===true&&!trainingHasEnded(t)){
+   const rel=trainingRelativeLabel(t.date);
+   if(rel)dateLine.append(node('span','training-relative-badge',rel));
+  }
+  details.append(dateLine,node('span','training-time','◷ '+t.start+' – '+t.end));
+  const count=node('button','training-attendees training-attendance-open','0/–');
+  count.dataset.trainingId=t.id;
   count.type='button';count.setAttribute('aria-label','Otvori popis dolaznosti za '+formatTrainingDate(t.date));
   count.addEventListener('click',()=>openAttendanceModal(t.id));
   head.append(details,count);card.append(head);
@@ -1242,9 +1288,8 @@ function renderTrainings(run){
    if(run!==generation)return;
    const votes=snapshot.docs.map(d=>({id:d.id,...d.data()}));
    trainingVoteData[t.id]={votes};
-   const {rows}=buildAttendanceRows(votes);
-   count.textContent='👥 '+rows.length+' prijava';
-   count.title='Otvori popis Google prijava';
+   refreshTrainingAttendanceBadges();
+   count.title='Otvori popis dolaznosti';
    const mine=votes.find(v=>v.id===auth.currentUser?.uid);
    responses.querySelectorAll('button').forEach(b=>{const checked=b.dataset.choice===mine?.choice;b.classList.toggle('selected',checked);b.setAttribute('aria-pressed',String(checked))});
    if(openAttendanceTrainingId===t.id)renderAttendanceModal();
@@ -1579,9 +1624,9 @@ const unUsers=onSnapshot(query(collection(db,'users')),snapshot=>{
  const eligible=new Set(approvedPlayersGoogle.map(d=>d.uid));
  eligible.add(auth.currentUser.uid);
  approvedGoogleUserIds=eligible;
- renderHomeAttendance();
+ renderHomeAttendance();refreshTrainingAttendanceBadges();
  if(openAttendanceTrainingId)renderAttendanceModal();
-},error=>{approvedPlayersGoogle=[];approvedGoogleUserIds=null;renderPlayers();renderHomeAttendance();if(openAttendanceTrainingId)renderAttendanceModal();notify(readableError(error),true)});unsubscribers.push(unUsers)}
+},error=>{approvedPlayersGoogle=[];approvedGoogleUserIds=null;renderPlayers();renderHomeAttendance();refreshTrainingAttendanceBadges();if(openAttendanceTrainingId)renderAttendanceModal();notify(readableError(error),true)});unsubscribers.push(unUsers)}
 }catch(error){if(current!==generation)return;notify(readableError(error),true);$('roleDiagnostic').textContent='Ne mogu provjeriti admins zapis: '+readableError(error);show('roleDiagnostic',true);show('uidArea',true)}});
 if('serviceWorker' in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
