@@ -434,7 +434,15 @@ body.modal-open{overflow:hidden}
 #moreStats .more-match-score.win{color:var(--green)}
 #moreStats .more-match-score.loss{color:var(--red)}
 #moreStats .more-match-score small{color:var(--muted)}
-.group-match-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--muted);font-size:11px;margin:0 0 10px;line-height:1.35}#moreStats .more-match-outcome{display:block;font-size:11px;font-weight:800;line-height:1.35;margin-top:1px}#moreStats .more-match-outcome.win{color:var(--green)}#moreStats .more-match-outcome.loss{color:var(--red)}</style>
+.group-match-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--muted);font-size:11px;margin:0 0 10px;line-height:1.35}#moreStats .more-match-outcome{display:block;font-size:11px;font-weight:800;line-height:1.35;margin-top:1px}#moreStats .more-match-outcome.win{color:var(--green)}#moreStats .more-match-outcome.loss{color:var(--red)}
+/* Prominent full weekday and relative-day badge on the home training card. */
+.next-training-card{padding:17px 16px 19px}
+.next-training-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}
+.next-training-heading .eyeline{font-size:13px;margin:0}
+.next-training-card .datebig{font-size:clamp(18px,4.5vw,23px);font-weight:850;line-height:1.4;letter-spacing:-.015em}
+.next-training-badge{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:6px 11px;font-weight:850;font-size:12px;background:var(--accent-soft);color:var(--accent);border:1px solid var(--line);white-space:nowrap}
+@media(max-width:360px){.next-training-card .datebig{font-size:18px}.next-training-badge{padding:5px 8px;font-size:11px}}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -468,7 +476,7 @@ body.modal-open{overflow:hidden}
 <section class="card" id="accountCard"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div><button type="button" class="button secondary" id="logout">Odjava</button></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div></section>
 <div id="approvedArea" class="hidden">
 <section class="section active" id="screen-home">
-<div class="card next-training-card"><div class="between"><div><div class="eyeline">▣ Sljedeći trening</div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><p class="muted" id="nextTrainingInfo" style="margin:7px 0 0">Raspored će se pojaviti nakon što administrator doda prvi trening.</p></div></div></div>
+<div class="card next-training-card"><div class="next-training-heading"><span class="eyeline">▣ Sljedeći trening</span><span class="next-training-badge hidden" id="nextTrainingBadge"></span></div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div></div>
 <div class="card"><div class="between attendance-heading"><h2><span aria-hidden="true">👥</span><span>Dolaznost na trening</span></h2><button type="button" class="home-attendance-open" id="homeMemberCount" aria-live="polite" title="Otvori dolaznost sljedećeg treninga" disabled>Učitavanje prijava…</button></div><div class="stats"><div class="stat go"><b id="homeYesCount">–</b><span>Dolaze</span></div><div class="stat no"><b id="homeNoCount">–</b><span>Ne dolaze</span></div><div class="stat maybe"><b id="homeMaybeCount">–</b><span>Možda</span></div><div class="stat"><b id="homePendingCount">–</b><span>Bez odgovora</span></div></div></div>
 <div class="mini-nav" style="margin-bottom:13px"><button class="tile" data-go="results"><span class="icon">🏆</span>Rezultati</button><button class="tile" id="homeAddResult"><span class="icon">🏸</span>Dodaj rezultat</button></div>
 <div class="card"><div class="between"><h2>🏸 Zadnji rezultati</h2></div><div id="homeRecentResults"><div class="hint">Učitavanje rezultata…</div></div></div>
@@ -1097,8 +1105,25 @@ function renderTrainings(run){
  const sorted=[...trainingCache].sort((a,b)=>String(a.date+' '+a.start).localeCompare(String(b.date+' '+b.start)));
  const today=new Date(),nowDate=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
  const upcoming=sorted.find(t=>t.active===true&&!trainingHasEnded(t));
- $('nextDate').textContent=upcoming?formatTrainingDate(upcoming.date)+' · '+upcoming.start+' – '+upcoming.end:'Trenutačno nije objavljen';
- $('nextTrainingInfo').textContent=upcoming?'Sljedeći termin prema objavljenom rasporedu.':'Nema nadolazećih termina.';setHomeTraining(upcoming);
+ if(upcoming){
+  const [year,month,day]=String(upcoming.date).split('-').map(Number);
+  const date=new Date(Date.UTC(year,month-1,day,12));
+  const weekday=new Intl.DateTimeFormat('hr-HR',{weekday:'long',timeZone:'UTC'}).format(date);
+  const fullWeekday=weekday.charAt(0).toLocaleUpperCase('hr-HR')+weekday.slice(1);
+  const timeText=upcoming.start+' – '+upcoming.end;
+  $('nextDate').textContent=fullWeekday+', '+day+'. '+month+'. · '+timeText;
+  const now=new Date();
+  const dateInZagreb=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Zagreb',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(now);
+  const parts=Object.fromEntries(dateInZagreb.filter(x=>x.type!=='literal').map(x=>[x.type,Number(x.value)]));
+  const dayDifference=Math.round((Date.UTC(year,month-1,day)-Date.UTC(parts.year,parts.month-1,parts.day))/86400000);
+  const badgeText=dayDifference===0?'Danas':dayDifference===1?'Sutra':dayDifference===2?'Prekosutra':dayDifference>2?'Za '+dayDifference+' dana':'';
+  $('nextTrainingBadge').textContent=badgeText;
+  show('nextTrainingBadge',!!badgeText);
+ }else{
+  $('nextDate').textContent='Trenutačno nije objavljen';
+  show('nextTrainingBadge',false);
+ }
+ setHomeTraining(upcoming);
  const monthKey=String(trainingShownYear)+'-'+String(trainingShownMonth+1).padStart(2,'0');
  const visible=sorted.filter(t=>String(t.date).startsWith(monthKey));
  if(openAttendanceTrainingId&&!visible.some(t=>t.id===openAttendanceTrainingId))closeAttendanceModal();
