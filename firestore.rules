@@ -49,6 +49,28 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isOwner() && resource.data.role == 'admin';
     }
+    // Each approved Google user controls their own match visibility.
+    // Admins can only record the choice of a player who has no linked Google account.
+    match /resultPrivacy/{playerId} {
+      allow get, list: if isMember();
+      allow create, update: if isMember()
+        && request.resource.data.keys().hasOnly(['visible'])
+        && request.resource.data.keys().hasAll(['visible'])
+        && request.resource.data.visible is bool
+        && (
+          (playerId == 'google_' + request.auth.uid)
+          || (
+            exists(/databases/$(database)/documents/players/$(playerId))
+            && get(/databases/$(database)/documents/players/$(playerId)).data.get('linkedUid', '') == request.auth.uid
+          )
+          || (
+            isAdmin()
+            && exists(/databases/$(database)/documents/players/$(playerId))
+            && !get(/databases/$(database)/documents/players/$(playerId)).data.keys().hasAny(['linkedUid'])
+          )
+        );
+      allow delete: if false;
+    }
     match /players/{playerId} {
       allow get, list: if isMember();
       allow create: if isAdmin()
