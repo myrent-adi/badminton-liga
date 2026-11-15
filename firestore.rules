@@ -111,9 +111,18 @@ service cloud.firestore {
         allow get, list: if isMember();
         allow create, update: if isMember()
           && request.auth.uid == userId
-          && request.resource.data.keys().hasOnly(['choice', 'updatedAt', 'displayName'])
+          && request.resource.data.keys().hasOnly(['choice', 'updatedAt', 'displayName', 'lateNote'])
           && request.resource.data.keys().hasAll(['choice', 'updatedAt'])
           && request.resource.data.choice in ['yes', 'no', 'maybe']
+          && (
+            !request.resource.data.keys().hasAny(['lateNote'])
+            || (
+              request.resource.data.choice == 'yes'
+              && request.resource.data.lateNote is string
+              && request.resource.data.lateNote.size() >= 1
+              && request.resource.data.lateNote.size() <= 160
+            )
+          )
           && (
             !request.resource.data.keys().hasAny(['displayName'])
             || (
