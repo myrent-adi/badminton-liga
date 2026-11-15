@@ -532,7 +532,7 @@ body.preview-player .result-edit-button,
 body.preview-player .player-admin-actions,
 body.preview-player .player-role-badge.owner,
 body.preview-player #uidArea{display:none!important}
-</style>
+.result-interrupted-field{display:flex;gap:11px;align-items:flex-start;padding:14px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;margin:12px 0;color:var(--ink)}.result-interrupted-field input{flex:0 0 23px;width:23px;height:23px;margin:0;accent-color:var(--accent)}.result-interrupted-field span{display:flex;flex-direction:column;gap:5px}.result-interrupted-field strong{font-size:15px}.result-interrupted-field small{color:var(--muted);font-size:12px;line-height:1.45}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -623,7 +623,7 @@ body.preview-player #uidArea{display:none!important}
  </div>
 </div>
 <div class="result-form-section">🏆 Rezultat meča <span class="result-section-desc">Unesi bodove po setovima</span></div>
-<div id="resultSetRows"></div>
+<label class="result-interrupted-field"><input type="checkbox" id="resultInterrupted"><span><strong>⏸️ Prekinut meč</strong><small>Ako drugi set nije odigran (npr. zbog umora), spremi samo prvi set bez konačnog pobjednika.</small></span></label><div id="resultSetRows"></div>
 <button type="button" class="result-add-set" id="resultAddSet">＋ Dodaj 3. set</button>
 <div id="resultPreview" class="result-preview" aria-live="polite">Unesi bodove za izračun pobjednika.</div>
 <label class="field">💬 Bilješka (opcionalno)<textarea id="resultNote" maxlength="300" placeholder="Npr. Dobar meč! 💪" rows="3"></textarea></label>
@@ -748,7 +748,7 @@ function personalMatches(){
    inB=(r.teamBNames||[]).some(n=>names.has(String(n).trim().toLocaleLowerCase('hr')));
   }
   if(inA===inB)return null;
-  return {...r,meOnA:inA,won:inA?Number(r.setsA)>Number(r.setsB):Number(r.setsB)>Number(r.setsA)};
+  return {...r,meOnA:inA,won:r.interrupted===true?null:(inA?Number(r.setsA)>Number(r.setsB):Number(r.setsB)>Number(r.setsA))};
  }).filter(Boolean).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id||'').localeCompare(String(a.id||'')));
 }
 let groupStatsType='all';
@@ -758,7 +758,7 @@ document.querySelectorAll('[data-group-type]').forEach(button=>button.addEventLi
  renderMoreStats();
 }));
 function groupMatchRate(matches){
- const completed=matches.filter(r=>Number.isFinite(Number(r.setsA))&&Number.isFinite(Number(r.setsB)));
+ const completed=matches.filter(r=>r.interrupted!==true&&Number.isFinite(Number(r.setsA))&&Number.isFinite(Number(r.setsB)));
  const straight=completed.filter(r=>Math.max(Number(r.setsA),Number(r.setsB))===2&&Math.min(Number(r.setsA),Number(r.setsB))===0).length;
  return {count:straight,total:completed.length,percentage:completed.length?Math.round(100*straight/completed.length):0};
 }
@@ -794,12 +794,12 @@ function renderMoreStats(){
   const myTeam=r.meOnA?r.teamANames:r.teamBNames;
   const otherTeam=r.meOnA?r.teamBNames:r.teamANames;
   teams.append(node('strong','',shortTeam(myTeam)+' – '+shortTeam(otherTeam)));
-  teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')));
+  teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')+(r.interrupted===true?' · Prekinuto':'')));
   const personalWon=r.won;
   const myScore=r.meOnA?String(r.setsA)+' : '+String(r.setsB):String(r.setsB)+' : '+String(r.setsA);
-  const score=node('div','more-match-score '+(personalWon?'win':'loss'),myScore);
-  score.setAttribute('aria-label','Tvoj rezultat '+myScore+(personalWon?', pobjeda':', poraz'));
-  const resultLabel=node('span','more-match-outcome '+(personalWon?'win':'loss'),personalWon?'Pobjeda':'Poraz');
+  const score=node('div','more-match-score '+(personalWon===null?'':personalWon?'win':'loss'),myScore);
+  score.setAttribute('aria-label','Tvoj rezultat '+myScore+(personalWon===null?', prekinuto':personalWon?', pobjeda':', poraz'));
+  const resultLabel=node('span','more-match-outcome '+(personalWon===null?'':personalWon?'win':'loss'),personalWon===null?'Prekinuto':personalWon?'Pobjeda':'Poraz');
   score.append(resultLabel);
   const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>r.meOnA?p.a+':'+p.b:p.b+':'+p.a).join(', '):'';
   if(points)score.append(node('small','','('+points+')'));
@@ -1456,8 +1456,20 @@ function buildResultSet(number,a='',b=''){
  for(const input of [inputA,inputB])input.addEventListener('input',updateResultPreview);
  return row;
 }
+function syncInterruptedSet(){
+ const interrupted=$('resultInterrupted').checked;
+ const rows=[...$('resultSetRows').querySelectorAll('.result-point-row')];
+ for(const row of rows){
+  if(row.dataset.set==='1')continue;
+  row.classList.toggle('hidden',interrupted);
+  row.querySelectorAll('input').forEach(input=>{input.disabled=interrupted;input.required=!interrupted});
+ }
+ show('resultAddSet',!interrupted&&!rows.some(row=>row.dataset.set==='3'));
+ updateResultPreview();
+}
+$('resultInterrupted').addEventListener('change',syncInterruptedSet);
 function getResultSets(){
- return Array.from($('resultSetRows').querySelectorAll('.result-point-row')).map(row=>{
+ return Array.from($('resultSetRows').querySelectorAll('.result-point-row:not(.hidden)')).map(row=>{
   const fields=row.querySelectorAll('input');
   return {a:fields[0].value===''?null:Number(fields[0].value),b:fields[1].value===''?null:Number(fields[1].value)};
  });
@@ -1470,11 +1482,18 @@ function resultSetOutcome(sets){
  if(sets.length===3&&((sets[0].a>sets[0].b)===(sets[1].a>sets[1].b)))return null;
  return {winsA,winsB,winner:winsA===2?'A':'B'};
 }
+function interruptedResultOutcome(sets){
+ if(sets.length!==1)return null;
+ const {a,b}=sets[0];
+ if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>99||b>99||a===b)return null;
+ return {winsA:a>b?1:0,winsB:b>a?1:0,winner:null};
+}
 function updateResultPreview(){
- const sets=getResultSets(),outcome=resultSetOutcome(sets),box=$('resultPreview');
+ const sets=getResultSets(),interrupted=$('resultInterrupted').checked;
+ const outcome=interrupted?interruptedResultOutcome(sets):resultSetOutcome(sets),box=$('resultPreview');
  box.classList.toggle('result-has-winner',!!outcome);
- if(outcome)box.textContent='🏆 Pobjeda tima '+outcome.winner+'  '+outcome.winsA+' : '+outcome.winsB+'  ('+sets.map(x=>x.a+':'+x.b).join(', ')+')';
- else box.textContent='Unesi dva seta (svaki ima pobjednika). Za rezultat 2:1 dodaj treći set.';
+ if(outcome)box.textContent=interrupted?'⏸️ Prekinuto nakon 1. seta ('+sets[0].a+':'+sets[0].b+') · bez konačnog pobjednika':'🏆 Pobjeda tima '+outcome.winner+'  '+outcome.winsA+' : '+outcome.winsB+'  ('+sets.map(x=>x.a+':'+x.b).join(', ')+')';
+ else box.textContent=interrupted?'Unesi rezultat prvog odigranog seta.':'Unesi dva seta (svaki ima pobjednika). Za rezultat 2:1 dodaj treći set.';
 }
 $('resultAddSet').addEventListener('click',()=>{$('resultSetRows').append(buildResultSet(3));show('resultAddSet',false);updateResultPreview()});
 $('homeAddResult').addEventListener('click',()=>{navigate('results');openResultModal()});
@@ -1506,9 +1525,11 @@ function editResult(id){
   addResultPlayerFallback('resultB2',b[1],result.teamBNames?.[1]);
  }
  const sets=Array.isArray(result.pointSets)?result.pointSets:[];
+ $('resultInterrupted').checked=result.interrupted===true;
  $('resultSetRows').replaceChildren(buildResultSet(1,sets[0]?.a??'',sets[0]?.b??''),buildResultSet(2,sets[1]?.a??'',sets[1]?.b??''));
  if(sets.length>=3)$('resultSetRows').append(buildResultSet(3,sets[2]?.a??'',sets[2]?.b??''));
  show('resultAddSet',sets.length<3);
+ syncInterruptedSet();
  $('resultNote').value=typeof result.note==='string'?result.note:'';
  updateResultPreview();
 }
@@ -1516,7 +1537,7 @@ function openResultModal(){
  if(!auth.currentUser)return;
  resultModalReturnFocus=document.activeElement;
  editingResultId=null;$('resultModalTitle').textContent='Dodaj rezultat';$('resultSave').textContent='✓ Spremi rezultat';
- $('resultForm').reset();$('resultFeedback').textContent='';$('resultType').value='singles';
+ $('resultForm').reset();$('resultFeedback').textContent='';$('resultType').value='singles';$('resultInterrupted').checked=false;
  const today=new Date();$('resultDate').value=[today.getFullYear(),String(today.getMonth()+1).padStart(2,'0'),String(today.getDate()).padStart(2,'0')].join('-');
  $('resultSetRows').replaceChildren(buildResultSet(1),buildResultSet(2));show('resultAddSet',true);
  populateResultTrainings();populateResultPlayers();resultTypeChanged();$('resultDateField').classList.remove('hidden');
@@ -1561,20 +1582,22 @@ $('resultForm').addEventListener('submit',async e=>{
   }
  }
  if(ids.some(id=>!selectable.some(p=>p.id===id))){msg.textContent='Jedan od igrača više nije dostupan za odabir.';return}
- const sets=getResultSets(),outcome=resultSetOutcome(sets);
- if(!outcome){msg.textContent='Provjeri rezultat: pobjednik mora osvojiti 2 seta, a u svakom setu bodovi moraju biti različiti.';return}
+ const sets=getResultSets(),interrupted=$('resultInterrupted').checked,outcome=interrupted?interruptedResultOutcome(sets):resultSetOutcome(sets);
+ if(!outcome){msg.textContent=interrupted?'Za prekinuti meč unesi valjani prvi set.':'Provjeri rezultat: pobjednik mora osvojiti 2 seta, a u svakom setu bodovi moraju biti različiti.';return}
  const training=trainingCache.find(t=>t.id===$('resultTraining').value);
  const date=training?.date||$('resultDate').value;
  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)){msg.textContent='Odaberi valjani datum.';return}
  const getName=id=>selectable.find(p=>p.id===id)?.name||'Igrač';
  const record={date,type,teamA:idsA,teamB:idsB,teamANames:idsA.map(getName),teamBNames:idsB.map(getName),
   setsA:outcome.winsA,setsB:outcome.winsB,pointSets:sets,note:$('resultNote').value.trim()};
+ if(interrupted)record.interrupted=true;
  if(training)record.trainingId=training.id;
  save.disabled=true;msg.textContent='Spremanje…';
  try{
   if(editingResultId){
    const update={...record,updatedAt:serverTimestamp(),updatedBy:auth.currentUser.uid};
    if(!training)update.trainingId=deleteField();
+   if(!interrupted)update.interrupted=deleteField();
    await updateDoc(doc(db,'results',editingResultId),update);
    closeResultModal();notify('✅ Rezultat je ispravljen.');
   }else{
@@ -1654,7 +1677,7 @@ function renderResults(){renderMoreStats();
   const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
   const namesText=shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames);
   teams.append(node('strong','',namesText));
-  teams.append(node('small','',doubles?'Parovi':'Pojedinačno'));
+  teams.append(node('small','',(doubles?'Parovi':'Pojedinačno')+(r.interrupted===true?' · Prekinuto':'')));
   const score=node('div','result-compact-score',String(r.setsA)+' : '+String(r.setsB));
   const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
   if(points)score.append(node('small','','('+points+')'));
