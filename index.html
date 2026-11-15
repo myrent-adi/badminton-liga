@@ -532,7 +532,28 @@ body.preview-player .result-edit-button,
 body.preview-player .player-admin-actions,
 body.preview-player .player-role-badge.owner,
 body.preview-player #uidArea{display:none!important}
-.result-interrupted-field{display:flex;gap:11px;align-items:flex-start;padding:14px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;margin:12px 0;color:var(--ink)}.result-interrupted-field input{flex:0 0 23px;width:23px;height:23px;margin:0;accent-color:var(--accent)}.result-interrupted-field span{display:flex;flex-direction:column;gap:5px}.result-interrupted-field strong{font-size:15px}.result-interrupted-field small{color:var(--muted);font-size:12px;line-height:1.45}</style>
+.result-interrupted-field{display:flex;gap:11px;align-items:flex-start;padding:14px 12px;background:var(--panel2);border:1px solid var(--line);border-radius:13px;margin:12px 0;color:var(--ink)}.result-interrupted-field input{flex:0 0 23px;width:23px;height:23px;margin:0;accent-color:var(--accent)}.result-interrupted-field span{display:flex;flex-direction:column;gap:5px}.result-interrupted-field strong{font-size:15px}.result-interrupted-field small{color:var(--muted);font-size:12px;line-height:1.45}
+/* High contrast: white labels on every solid-blue primary action, all screens. */
+.button:not(.secondary):not(.outline):not(.danger):not(.google){
+ background:#086bd3;
+ color:#ffffff;
+}
+.button:not(.secondary):not(.outline):not(.danger):not(.google):hover{background:#075ab8}
+.button:not(.secondary):not(.outline):not(.danger):not(.google):active{background:#064b9c}
+#ownerPreviewToggle{background:#086bd3;color:#fff}
+.training-add-trigger{background:linear-gradient(145deg,#087ddc,#0751ae);color:#fff}
+.training-tab.active,
+.attendance-filter.active,
+.attendance-filters .attendance-filter.active,
+.group-stats-tab.active{background:#086bd3;color:#fff}
+#resultModal .result-type-option.selected{background:linear-gradient(135deg,#086bd3,#0750a8);color:#fff}
+#resultModal .result-submit{background:linear-gradient(110deg,#086bd3,#0751ae);color:#fff}
+.manual-attendance-button.selected{background:#086bd3;color:#fff}
+@media(prefers-color-scheme:dark){
+ .button:not(.secondary):not(.outline):not(.danger):not(.google){background:#086bd3;color:#fff}
+ .button:not(.secondary):not(.outline):not(.danger):not(.google):hover{background:#075ab8}
+}
+</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
