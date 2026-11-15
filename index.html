@@ -1477,7 +1477,7 @@ function renderResults(){renderMoreStats();
   const teams=node('div','recent-result-teams');
   const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
   teams.append(node('strong','',shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames)));
-  teams.append(node('small','',String(r.date||'')+' · '+(doubles?'Parovi':'Pojedinačno')));
+  teams.append(node('small','',doubles?'Parovi':'Pojedinačno'));
   const score=node('div','recent-result-score',String(r.setsA)+' : '+String(r.setsB));
   const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
   if(points)score.append(node('small','', '('+points+')'));
