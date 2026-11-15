@@ -425,7 +425,16 @@ body.modal-open{overflow:hidden}
 .group-ring span{font-size:clamp(10px,2.5vw,13px);color:var(--muted)}
 .group-recent-card{margin-bottom:8px}.group-stats-note{font-size:12px;line-height:1.45}
 @media(max-width:370px){.group-stat-tiles{gap:5px}.group-stat-tile{min-height:99px}.group-stat-tile strong{font-size:20px}.group-stat-tile small{font-size:10px}.group-stat-tile>span{font-size:22px}.group-rings{gap:6px}.group-ring{padding:7px}.group-stats-tab{font-size:12px}}
-</style>
+
+/* Distinct singles/doubles racquets and first-team win/loss color. */
+#moreStats .more-match-symbol{width:33px;height:39px;flex:0 0 33px;display:grid;place-items:center;color:var(--accent)}
+#moreStats .more-match-symbol svg{width:33px;height:33px;display:block}
+#moreStats .match-icon-doubles{color:#9b68e5}
+#moreStats .match-icon-singles{color:#168cdb}
+#moreStats .more-match-score.win{color:var(--green)}
+#moreStats .more-match-score.loss{color:var(--red)}
+#moreStats .more-match-score small{color:var(--muted)}
+.group-match-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--muted);font-size:11px;margin:0 0 10px;line-height:1.35}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -561,7 +570,7 @@ body.modal-open{overflow:hidden}
 <div class="group-ring-item"><div class="group-ring doubles" id="groupRingDoubles"><div><small>Parovi</small><strong id="groupRateDoubles">0%</strong><span id="groupDetailDoubles">0/0</span></div></div></div>
 <div class="group-ring-item"><div class="group-ring total" id="groupRingTotal"><div><small>Ukupno</small><strong id="groupRateTotal">0%</strong><span id="groupDetailTotal">0/0</span></div></div></div>
 </div></div>
-<div class="more-match-card group-recent-card"><h3>Zadnjih 5 mečeva</h3><div id="moreMatchRows"></div></div>
+<div class="more-match-card group-recent-card"><h3>Zadnjih 5 mečeva</h3><p class="group-match-legend"><span>🟢 Prva ekipa pobijedila</span><span>🔴 Prva ekipa izgubila</span></p><div id="moreMatchRows"></div></div>
 <p class="muted group-stats-note">Prikaz prema spremljenim rezultatima lige. Uspjeh je udio mečeva završenih rezultatom 2 : 0 (pobjeda bez izgubljenog seta); za sva tri prikaza računa se na jednak način.</p>
 </div>
 <div id="moreAbout" class="hidden"><button class="more-back" data-more-back type="button">‹ Natrag</button><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit">💻 Ideja, dizajn i izrada: <strong>Adi · web programer</strong><br>💙 Za zajednicu Silent Zagreb Badminton.</div></div></div>
@@ -667,10 +676,19 @@ function renderMoreStats(){
   const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
   teams.append(node('strong','',shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames)));
   teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')));
-  const score=node('div','more-match-score',String(r.setsA)+' : '+String(r.setsB));
+  const teamAWon=Number(r.setsA)>Number(r.setsB);
+  const teamBWon=Number(r.setsB)>Number(r.setsA);
+  const score=node('div','more-match-score '+(teamAWon?'win':teamBWon?'loss':''),String(r.setsA)+' : '+String(r.setsB));
+  score.setAttribute('aria-label',String(r.setsA)+' prema '+String(r.setsB)+(teamAWon?', pobjeda prve ekipe':teamBWon?', poraz prve ekipe':''));
   const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
   if(points)score.append(node('small','','('+points+')'));
-  row.append(node('span','more-match-symbol','🏸'),teams,score);
+  const icon=node('span','more-match-symbol '+(r.type==='doubles'?'match-icon-doubles':'match-icon-singles'));
+  icon.setAttribute('role','img');
+  icon.setAttribute('aria-label',r.type==='doubles'?'Parovi – dva reketa':'Pojedinačno – jedan reket');
+  icon.innerHTML=r.type==='doubles'
+   ?'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="14" cy="13" rx="7" ry="10" transform="rotate(-34 14 13)"/><ellipse cx="28" cy="13" rx="7" ry="10" transform="rotate(34 28 13)"/><path d="M19 21 7 37M23 21l12 16M10 6l9 13M7 12l11 4M32 6l-9 13m12-7-11 4M5 37l5-6m27 6-5-6"/></g></svg>'
+   :'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="22" cy="15" rx="9" ry="12" transform="rotate(30 22 15)"/><path d="M17 25 8 38M12 36l-6-4M17 6l12 17M13 12l17 7M15 19l14 2M24 4l9 17"/></g></svg>';
+  row.append(icon,teams,score);
   host.append(row);
  }
 }
