@@ -553,6 +553,10 @@ body.preview-player #uidArea{display:none!important}
  .button:not(.secondary):not(.outline):not(.danger):not(.google){background:#086bd3;color:#fff}
  .button:not(.secondary):not(.outline):not(.danger):not(.google):hover{background:#075ab8}
 }
+
+/* Logout is the final action in More, full width and easy to tap. */
+#accountMount #accountCard{margin-top:13px;margin-bottom:0}
+#accountCard #logout{display:block;width:100%;min-height:50px;margin-top:16px;text-align:center;font-size:16px;font-weight:850}
 </style>
 </head>
 <body>
@@ -584,7 +588,7 @@ body.preview-player #uidArea{display:none!important}
 <section id="loading" class="card loading" aria-live="polite"><h2>Učitavanje…</h2><p class="muted">Provjeravamo Google prijavu i Firebase.</p></section>
 <section id="signedOut" class="card hidden"><h2>Dobrodošli u ligu</h2><p>Prijavi se svojim Google računom. Ne treba ti nova lozinka.</p><button type="button" class="button google" id="login"><strong>G</strong> Nastavi s Googleom</button><p class="muted">Novi članovi čekaju odobrenje administratora.</p></section>
 <div id="signedArea" class="hidden">
-<section class="card" id="accountCard"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div><button type="button" class="button secondary" id="logout">Odjava</button></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div></section>
+<section class="card" id="accountCard"><div class="account"><div><strong id="userName">Igrač</strong><small id="userEmail"></small><small id="accountRole"></small><small id="roleDiagnostic" class="hidden" style="color:var(--red);font-size:12px;margin-top:8px;overflow-wrap:anywhere" aria-live="polite"></small></div></div><p class="notice" id="profileStatus" aria-live="polite">Provjera statusa…</p><div id="uidArea" class="hidden"><p class="muted small">Tvoj korisnički UID (za postavljanje administratora u Firebase konzoli):</p><span class="code" id="myUid"></span></div><button type="button" class="button secondary full" id="logout">Odjava</button></section>
 <div id="approvedArea" class="hidden">
 <section class="section active" id="screen-home">
 <div class="card next-training-card"><div class="next-training-heading"><span class="eyeline">▣ Sljedeći trening</span><span class="next-training-badge hidden" id="nextTrainingBadge"></span></div><div class="datebig" id="nextDate">Trenutačno nije objavljen</div><div class="next-training-time hidden" id="nextTrainingTime"><span class="next-training-clock" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span id="nextTimeText">18:00 – 20:00</span></div></div>
@@ -667,9 +671,9 @@ body.preview-player #uidArea{display:none!important}
 <div id="moreOverview">
 <div class="more-menu"><button class="more-menu-button" id="moreShowStats" type="button"><span class="more-menu-symbol">▥</span> Statistika <span class="more-chevron">›</span></button><button class="more-menu-button" id="moreShowAbout" type="button"><span class="more-menu-symbol">ⓘ</span> O aplikaciji <span class="more-chevron">›</span></button></div>
 <div id="ownerPreviewPanel" class="card owner-preview-panel hidden"><h2>👁️ Probni prikaz</h2><p class="muted">Pregledaj aplikaciju kao običan igrač, bez drugog Google računa. Ovo mijenja samo izgled, ne Firebase ovlasti.</p><button id="ownerPreviewToggle" type="button" class="button full">👁️ Prikaži kao igrač</button></div>
-<div id="accountMount"></div>
 <div class="card"><h2>Postavke</h2><div class="entry"><strong>Izgled aplikacije</strong><small>Prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju.</small></div></div>
 <div id="admin" class="card hidden"><h2 id="adminHeading">👑 Administracija · prijave članova</h2><p class="muted">Odobri ili odbij novog igrača.</p><div class="muted" id="adminCount">Učitavanje…</div><div id="userRows"></div></div>
+<div id="accountMount"></div>
 </div>
 <div id="moreStats" class="hidden">
 <div class="group-stats-heading"><button class="group-stats-back" data-more-back type="button" aria-label="Natrag na Više">‹</button><h2>Statistika grupe</h2></div>
