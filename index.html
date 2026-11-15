@@ -461,6 +461,24 @@ body.modal-open{overflow:hidden}
 #homeRecentResults .recent-result-score{font-size:20px;font-weight:850;white-space:nowrap;color:var(--ink);text-align:right;flex-shrink:0}
 #homeRecentResults .recent-result-score small{display:block;font-size:10px;font-weight:550;color:var(--muted);margin-top:3px}
 @media(max-width:365px){#homeRecentResults .recent-result-list-row{gap:7px}#homeRecentResults .more-match-symbol{width:27px;flex-basis:27px}#homeRecentResults .more-match-symbol svg{width:27px;height:27px}#homeRecentResults .recent-result-teams strong{font-size:13px}#homeRecentResults .recent-result-score{font-size:18px}}
+
+/* Results list matches the compact, readable Home recent-results rows. */
+#resultsList .result-list-card{padding:14px 13px;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;color:var(--ink)}
+#resultsList .result-list-card+.result-list-card{border-top:1px solid var(--line)}
+#resultsList:has(.result-list-card){background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:3px 12px;margin-bottom:15px;overflow:hidden}
+#resultsList .result-compact-row{display:flex;align-items:center;gap:10px;min-width:0}
+#resultsList .more-match-symbol{width:32px;height:36px;flex:0 0 32px;display:grid;place-items:center}
+#resultsList .more-match-symbol svg{width:32px;height:32px;display:block}
+#resultsList .match-icon-singles{color:#168cdb}
+#resultsList .match-icon-doubles{color:#9b68e5}
+#resultsList .result-compact-teams{flex:1;min-width:0;overflow-wrap:anywhere}
+#resultsList .result-compact-teams strong{display:block;font-size:14px;font-weight:800;line-height:1.35;color:var(--ink);white-space:normal}
+#resultsList .result-compact-teams small{display:block;font-size:11px;font-weight:550;color:var(--muted);margin-top:4px}
+#resultsList .result-compact-score{font-size:20px;font-weight:850;white-space:nowrap;color:var(--ink);text-align:right;flex-shrink:0}
+#resultsList .result-compact-score small{display:block;font-size:10px;font-weight:550;color:var(--muted);margin-top:3px}
+#resultsList .result-card-note{font-size:12px;margin:10px 0 0;padding-left:42px;color:var(--muted)}
+#resultsList .result-edit-button{margin:12px 0 0 42px}
+@media(max-width:365px){#resultsList .result-list-card{padding:13px 6px}#resultsList .result-compact-row{gap:7px}#resultsList .more-match-symbol{width:27px;flex-basis:27px}#resultsList .more-match-symbol svg{width:27px;height:27px}#resultsList .result-compact-teams strong{font-size:13px}#resultsList .result-compact-score{font-size:18px}}
 </style>
 </head>
 <body>
@@ -1437,20 +1455,34 @@ function renderResults(){renderMoreStats();
  }
  const visible=monthResults.filter(r=>r.date===resultsSelectedDay);
  for(const r of visible){
-  const item=node('article','result-card');
-  const meta=node('div','result-meta',r.type==='doubles'?'Parovi':'Pojedinačno');
+  const item=node('article','result-card result-list-card');
+  const row=node('div','result-compact-row');
   const doubles=r.type==='doubles';
-  const score=node('div','result-score'+(doubles?' result-score-doubles':''));
-  function teamNames(names,winner,fallback){
-   const team=node('div','result-team'+(winner?' winning':''));
-   const members=Array.isArray(names)&&names.length?names:[fallback];
-   for(const name of members){const display=node('span','result-player-name',shortResultPlayerName(name));display.title=String(name);team.append(display)}
-   return team;
+  const icon=node('span','more-match-symbol '+(doubles?'match-icon-doubles':'match-icon-singles'));
+  icon.setAttribute('role','img');
+  icon.setAttribute('aria-label',doubles?'Parovi – dva reketa':'Pojedinačno – jedan reket');
+  icon.innerHTML=doubles
+   ?'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="14" cy="13" rx="7" ry="10" transform="rotate(-34 14 13)"/><ellipse cx="28" cy="13" rx="7" ry="10" transform="rotate(34 28 13)"/><path d="M19 21 7 37M23 21l12 16M10 6l9 13M7 12l11 4M32 6l-9 13m12-7-11 4M5 37l5-6m27 6-5-6"/></g></svg>'
+   :'<svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><ellipse cx="22" cy="15" rx="9" ry="12" transform="rotate(30 22 15)"/><path d="M17 25 8 38M12 36l-6-4M17 6l12 17M13 12l17 7M15 19l14 2M24 4l9 17"/></g></svg>';
+  const teams=node('div','result-compact-teams');
+  const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
+  const namesText=shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames);
+  teams.append(node('strong','',namesText));
+  teams.append(node('small','',doubles?'Parovi':'Pojedinačno'));
+  const score=node('div','result-compact-score',String(r.setsA)+' : '+String(r.setsB));
+  const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
+  if(points)score.append(node('small','','('+points+')'));
+  row.append(icon,teams,score);
+  item.append(row);
+  if(['owner','admin'].includes(currentRole)){
+   const edit=node('button','result-edit-button'+(resultEditMode?'':' hidden'),'✏️ Uredi');
+   edit.type='button';
+   edit.setAttribute('aria-label','Uredi rezultat '+namesText);
+   edit.addEventListener('click',()=>editResult(r.id));
+   item.append(edit);
   }
-  const namesA=teamNames(r.teamANames,r.setsA>r.setsB,'Tim A');
-  const namesB=teamNames(r.teamBNames,r.setsB>r.setsA,'Tim B');
-  const points=node('strong','result-points',String(r.setsA)+' : '+String(r.setsB));
-  score.append(namesA,points,namesB);item.append(meta,score);if(['owner','admin'].includes(currentRole)){const edit=node('button','result-edit-button'+(resultEditMode?'':' hidden'),'✏️ Uredi');edit.type='button';edit.setAttribute('aria-label','Uredi rezultat '+(Array.isArray(r.teamANames)?r.teamANames.join(' / '):'Tim A')+' protiv '+(Array.isArray(r.teamBNames)?r.teamBNames.join(' / '):'Tim B'));edit.addEventListener('click',()=>editResult(r.id));item.append(edit)}if(Array.isArray(r.pointSets)&&r.pointSets.length)item.append(node('div','result-point-detail','Setovi: '+r.pointSets.map(x=>x.a+':'+x.b).join(' · ')));if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));host.append(item);
+  if(typeof r.note==='string'&&r.note.trim())item.append(node('p','result-card-note',r.note));
+  host.append(item);
  }
  if(!sorted.length){recent.append(node('div','hint','Još nema spremljenih mečeva.'));return}
  // The home panel only shows matches from the latest day that has results.
