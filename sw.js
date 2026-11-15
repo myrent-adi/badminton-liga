@@ -1,4 +1,4 @@
-const CACHE='silent-zagreb-back-arrow-only-dark-white-v61-20261115';
+const CACHE='silent-zagreb-member-approvals-redesign-v62-20261115';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./icons/silent-logo-192.png','./icons/silent-logo-512.png','./icons/apple-touch-icon.png','./icons/silent-maskable-512.png','./assets/silent-zagreb-logo.jpg'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));self.skipWaiting()});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))));self.clients.claim()});
