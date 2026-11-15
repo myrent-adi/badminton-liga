@@ -636,6 +636,18 @@ body.preview-player #uidArea{display:none!important}
 #admin .admin-empty strong{font-size:15px;color:var(--ink)}
 #admin .admin-empty-icon{font-size:29px}
 @media(max-width:350px){#admin{padding:14px 11px}#admin .admin-member-status{font-size:10px}#admin .admin-summary-tile span{font-size:10px}}
+
+/* Explicit confirmation before denying a Google member request. */
+.reject-member-overlay{position:fixed;inset:0;z-index:220;display:flex;align-items:center;justify-content:center;padding:20px max(18px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));background:#07152cbb}
+.reject-member-dialog{width:min(100%,420px);background:var(--panel);border:1px solid var(--line);border-radius:21px;padding:25px 20px 20px;box-shadow:0 20px 65px #0006;color:var(--ink);text-align:center}
+.reject-member-symbol{display:grid;place-items:center;width:60px;height:60px;margin:0 auto 15px;background:var(--redbg);border-radius:18px;font-size:32px}
+.reject-member-dialog h2{font-size:21px;margin:0 0 10px;line-height:1.3}
+.reject-member-dialog p{font-size:15px;line-height:1.6;color:var(--muted);margin:0 0 23px;overflow-wrap:anywhere}
+.reject-member-dialog p strong{color:var(--ink)}
+.reject-member-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.reject-member-actions .button{font-size:15px;min-height:50px;padding:9px 6px}
+.reject-member-actions #rejectMemberConfirm{background:var(--redbg);border:1px solid var(--red);color:var(--red)}
+@media(max-width:350px){.reject-member-dialog{padding:21px 14px 16px}.reject-member-actions{gap:7px}}
 </style>
 </head>
 <body>
@@ -785,6 +797,13 @@ body.preview-player #uidArea{display:none!important}
 <p id="message" class="message" role="status" aria-live="polite"></p>
 </main>
 <nav id="bottomNav" class="bottom hidden" aria-label="Glavna navigacija"><div class="bottom-inner"><button class="nav-button active" type="button" data-go="home"><span class="sym">⌂</span>Početna</button><button class="nav-button" type="button" data-go="trainings"><span class="sym">▦</span>Treninzi</button><button class="nav-button" type="button" data-go="results"><span class="sym">🏆</span>Rezultati</button><button class="nav-button" type="button" data-go="players"><span class="sym">♙</span>Igrači</button><button class="nav-button" type="button" data-go="more"><span class="sym">☰</span>Više</button></div></nav>
+<div class="reject-member-overlay hidden" id="rejectMemberModal" aria-hidden="true">
+<div class="reject-member-dialog" role="alertdialog" aria-modal="true" aria-labelledby="rejectMemberTitle" aria-describedby="rejectMemberDescription">
+<div class="reject-member-symbol" aria-hidden="true">⚠️</div>
+<h2 id="rejectMemberTitle">Odbiti prijavu igrača?</h2>
+<p id="rejectMemberDescription">Želiš li stvarno odbiti prijavu za <strong id="rejectMemberName"></strong>? Igrač neće moći pristupiti aplikaciji dok ga ne odobriš.</p>
+<div class="reject-member-actions"><button type="button" class="button secondary" id="rejectMemberCancel">Odustani</button><button type="button" class="button danger" id="rejectMemberConfirm">Da, odbij</button></div>
+</div></div>
 <script type="module">
 import {initializeApp} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js';
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js';
@@ -1921,7 +1940,57 @@ function showAdminUsers(snapshot){
   host.append(row);
  }
 }
-async function changeStatus(uid,status,button){button.disabled=true;try{await updateDoc(doc(db,'users',uid),{status});notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.')}catch(error){notify(readableError(error),true)}finally{button.disabled=false}}
+let rejectMemberRequest=null;
+function closeRejectMemberModal(){
+ show('rejectMemberModal',false);
+ $('rejectMemberModal').setAttribute('aria-hidden','true');
+ const previous=rejectMemberRequest?.button;
+ rejectMemberRequest=null;
+ if(previous&&document.contains(previous))previous.focus();
+}
+function changeStatus(uid,status,button){
+ if(status==='rejected'){
+  const member=approvedPlayersGoogle.find(u=>u.uid===uid);
+  const row=button.closest('.admin-member-card');
+  const name=row?.querySelector('.admin-member-identity strong')?.textContent||member?.displayName||'ovog igrača';
+  rejectMemberRequest={uid,button};
+  $('rejectMemberName').textContent=name;
+  show('rejectMemberModal',true);
+  $('rejectMemberModal').setAttribute('aria-hidden','false');
+  $('rejectMemberCancel').focus();
+  return;
+ }
+ return applyMemberStatus(uid,status,button);
+}
+async function applyMemberStatus(uid,status,button){
+ button.disabled=true;
+ try{
+  await updateDoc(doc(db,'users',uid),{status});
+  notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.');
+ }catch(error){notify(readableError(error),true)}
+ finally{button.disabled=false}
+}
+$('rejectMemberCancel').addEventListener('click',closeRejectMemberModal);
+$('rejectMemberModal').addEventListener('click',event=>{if(event.target===$('rejectMemberModal'))closeRejectMemberModal()});
+$('rejectMemberConfirm').addEventListener('click',async()=>{
+ const request=rejectMemberRequest;
+ if(!request)return;
+ const confirmButton=$('rejectMemberConfirm');
+ confirmButton.disabled=true;
+ closeRejectMemberModal();
+ await applyMemberStatus(request.uid,'rejected',request.button);
+ confirmButton.disabled=false;
+});
+document.addEventListener('keydown',event=>{
+ if($('rejectMemberModal').classList.contains('hidden'))return;
+ if(event.key==='Escape'){event.preventDefault();closeRejectMemberModal();return}
+ if(event.key==='Tab'){
+  const items=[$('rejectMemberCancel'),$('rejectMemberConfirm')].filter(el=>!el.disabled);
+  if(!items.length)return;
+  if(event.shiftKey&&document.activeElement===items[0]){event.preventDefault();items[items.length-1].focus()}
+  else if(!event.shiftKey&&document.activeElement===items[items.length-1]){event.preventDefault();items[0].focus()}
+ }
+});
 onAuthStateChanged(auth,async user=>{const current=++generation;playerPreview=false;document.body.classList.remove('preview-player');show('ownerPreviewPanel',false);clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);closePlayerModal();closeResultModal();closeTrainingModal();closeAttendanceModal();closeTrainingEdit();trainingAttendanceFilter='yes';trainingEditMode=false;updateTrainingEditModeButton();playerEditMode=false;playerListTab='active';approvedPlayersGoogle=[];playerAdminRoles={};updatePlayerEditModeButton();resultEditMode=false;updateResultEditModeButton();trainingShownMonth=new Date().getMonth();trainingShownYear=new Date().getFullYear();resultsShownMonth=new Date().getMonth();resultsShownYear=new Date().getFullYear();resultsSelectedDay=null;trainingCache=[];trainingVoteData={};resultsCache=[];$('resultsList').replaceChildren(node('div','hint','Učitavanje rezultata…'));$('homeRecentResults').replaceChildren(node('div','hint','Učitavanje rezultata…'));currentRole='player';playersCache=[];$('homeMemberCount').textContent='Učitavanje prijava…';$('homeMemberCount').disabled=true;for(const id of ['homeYesCount','homeNoCount','homeMaybeCount'])$(id).textContent='–';finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;renderMoreProfile();$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
 try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;show('ownerPreviewPanel',role==='owner');renderMoreProfile();if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',true);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
