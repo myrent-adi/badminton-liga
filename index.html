@@ -591,6 +591,15 @@ body.preview-player #uidArea{display:none!important}
 #moreAbout .more-credit-role{font-size:13px;font-weight:700;color:#eef8ff}
 #moreAbout .more-credit-note{font-size:12px;line-height:1.5;color:#d3eeff;margin-top:7px}
 @media(max-width:350px){#moreAbout .more-subpage-header,.group-stats-heading{gap:9px}#moreAbout .more-back,.group-stats-heading .group-stats-back{min-width:103px;padding:10px 11px}}
+
+/* Icon-only back buttons: bright arrow in dark mode. */
+#moreAbout .more-back,.group-stats-heading .group-stats-back{width:50px;min-width:50px;height:50px;min-height:50px;padding:0;gap:0;flex-shrink:0}
+#moreAbout .more-back span,.group-stats-heading .group-stats-back span{font-size:38px;font-weight:700;line-height:1;display:block;transform:translateY(-2px)}
+@media(prefers-color-scheme:dark){
+ #moreAbout .more-back,.group-stats-heading .group-stats-back{background:#123b61;border-color:#477699;color:#ffffff}
+ #moreAbout .more-back span,.group-stats-heading .group-stats-back span{color:#ffffff}
+ #moreAbout .more-back:active,.group-stats-heading .group-stats-back:active{background:#1b537f}
+}
 </style>
 </head>
 <body>
@@ -710,7 +719,7 @@ body.preview-player #uidArea{display:none!important}
 <div id="accountMount"></div>
 </div>
 <div id="moreStats" class="hidden">
-<div class="group-stats-heading"><button class="group-stats-back" data-more-back type="button" aria-label="Natrag na Više"><span aria-hidden="true">‹</span> Natrag</button><h2>Statistika grupe</h2></div>
+<div class="group-stats-heading"><button class="group-stats-back" data-more-back type="button" aria-label="Natrag na Više"><span aria-hidden="true">‹</span></button><h2>Statistika grupe</h2></div>
 <div class="group-stats-tabs" role="tablist" aria-label="Vrsta mečeva">
 <button type="button" role="tab" id="groupTabAll" data-group-type="all" class="group-stats-tab active" aria-selected="true">Ukupno</button>
 <button type="button" role="tab" id="groupTabSingles" data-group-type="singles" class="group-stats-tab" aria-selected="false">Pojedinačni</button>
@@ -731,7 +740,7 @@ body.preview-player #uidArea{display:none!important}
 <div class="more-match-card group-recent-card"><h3>Mojih zadnjih 5 mečeva</h3><div id="moreMatchRows"></div></div>
 <p class="muted group-stats-note">Prikaz prema spremljenim rezultatima lige. Uspjeh je udio mečeva završenih rezultatom 2 : 0 (pobjeda bez izgubljenog seta); za sva tri prikaza računa se na jednak način.</p>
 </div>
-<div id="moreAbout" class="hidden"><div class="more-subpage-header"><button class="more-back" data-more-back type="button" aria-label="Natrag na Više"><span aria-hidden="true">‹</span> Natrag</button><h2>O aplikaciji</h2></div><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi Bajagilović</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit"><div class="more-credit-avatar" aria-hidden="true">💻</div><div class="more-credit-info"><span class="more-credit-eyebrow">IDEJA · DIZAJN · RAZVOJ</span><strong class="more-credit-name">Adi Bajagilović</strong><span class="more-credit-role">Web programer i autor aplikacije</span><span class="more-credit-note">💙 Izrađeno za zajednicu Silent Zagreb Badminton.</span></div></div></div></div>
+<div id="moreAbout" class="hidden"><div class="more-subpage-header"><button class="more-back" data-more-back type="button" aria-label="Natrag na Više"><span aria-hidden="true">‹</span></button><h2>O aplikaciji</h2></div><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi Bajagilović</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit"><div class="more-credit-avatar" aria-hidden="true">💻</div><div class="more-credit-info"><span class="more-credit-eyebrow">IDEJA · DIZAJN · RAZVOJ</span><strong class="more-credit-name">Adi Bajagilović</strong><span class="more-credit-role">Web programer i autor aplikacije</span><span class="more-credit-note">💙 Izrađeno za zajednicu Silent Zagreb Badminton.</span></div></div></div></div>
 </section>
 </div>
 <section id="pending" class="card hidden"><h2>⏳ Zahtjev je poslan</h2><p>Registracija je zabilježena. Administrator treba odobriti tvoj pristup. Ovaj ekran automatski će se osvježiti nakon odobrenja.</p></section>
