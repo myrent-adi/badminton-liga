@@ -663,6 +663,46 @@ body.preview-player #uidArea{display:none!important}
 #admin .admin-users-edit-toggle.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent)}
 #admin .admin-pending-hint{font-size:12px;color:var(--yellow);font-weight:750;margin:0 0 10px}
 #admin .admin-member-actions{grid-template-columns:1fr}
+
+/* Strong visual separation of own team and opponents in the result editor. */
+#resultModal .result-players-grid{display:flex;flex-direction:column;gap:0;margin-top:13px}
+#resultModal .result-player-side{padding:15px 14px 14px;border-radius:17px;min-width:0;box-shadow:0 3px 12px #09213a0b}
+#resultModal .result-my-side{border:2px solid #1684e6;background:#e8f4ff}
+#resultModal .result-opponents-side{border:2px solid #df5260;background:#fff0f0}
+#resultModal .result-side-title,#resultModal .result-opponents-side .result-side-title{display:flex;align-items:center;gap:10px;margin:0 0 13px;padding:0;border:0;border-radius:0;background:transparent;color:#162b45}
+#resultModal .result-side-symbol{display:grid;place-items:center;flex:0 0 39px;width:39px;height:39px;border-radius:12px;background:#d3eaff;font-size:19px}
+#resultModal .result-opponents-side .result-side-symbol{background:#ffdbdf}
+#resultModal .result-side-headline{display:flex;flex-direction:column;flex:1;gap:4px;min-width:0}
+#resultModal .result-side-headline strong{font-size:16px;font-weight:900;letter-spacing:.015em;line-height:1.2;color:#075bad}
+#resultModal .result-opponents-side .result-side-headline strong{color:#b92842}
+#resultModal .result-side-headline small{font-size:11px;font-weight:700;color:#526a85;line-height:1.3}
+#resultModal .result-opponents-side .result-side-headline small{color:#87525c}
+#resultModal .result-side-tag{display:grid;place-items:center;flex:0 0 31px;width:31px;height:31px;border-radius:10px;background:#0875da;color:white;font-weight:900}
+#resultModal .result-opponents-side .result-side-tag{background:#d63a50}
+#resultModal .result-player-side .field{margin:10px 0 0;color:#203c5b;font-weight:850;font-size:13px}
+#resultModal .result-opponents-side .field{color:#703441}
+#resultModal .result-player-side select{width:100%;min-width:0;background:white;color:#152c47;border:1.5px solid #a8d2f5;border-radius:12px;min-height:49px;font-size:15px}
+#resultModal .result-opponents-side select{border-color:#f0b1ba}
+#resultModal .result-player-side select:focus{outline:2px solid #1684e6;outline-offset:1px}
+#resultModal .result-opponents-side select:focus{outline-color:#d63a50}
+#resultModal .result-versus-divider{height:44px;display:flex;align-items:center;justify-content:center;position:relative;font-weight:900;letter-spacing:.12em;color:#586b83}
+#resultModal .result-versus-divider:before{content:"";position:absolute;height:2px;background:var(--line);left:15px;right:15px;top:50%}
+#resultModal .result-versus-divider span{z-index:1;position:relative;padding:6px 17px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:11px}
+@media(prefers-color-scheme:dark){
+ #resultModal .result-my-side{background:#0b2b49;border-color:#38a3fc}
+ #resultModal .result-opponents-side{background:#3b1e2c;border-color:#f16c7c}
+ #resultModal .result-side-title,#resultModal .result-opponents-side .result-side-title{color:#fff}
+ #resultModal .result-side-headline strong{color:#7cc7ff}
+ #resultModal .result-opponents-side .result-side-headline strong{color:#ff9ca9}
+ #resultModal .result-side-headline small{color:#b5d8f4}
+ #resultModal .result-opponents-side .result-side-headline small{color:#ffd0d7}
+ #resultModal .result-my-side .field{color:#d5edff}
+ #resultModal .result-opponents-side .field{color:#ffe1e5}
+ #resultModal .result-player-side select{background:#123754;color:#fff;border-color:#4685b8}
+ #resultModal .result-opponents-side select{background:#492536;border-color:#a85c6c}
+ #resultModal .result-side-symbol{background:#174f78}
+ #resultModal .result-opponents-side .result-side-symbol{background:#6b2b3e}
+}
 </style>
 </head>
 <body>
@@ -741,14 +781,15 @@ body.preview-player #uidArea{display:none!important}
 <select id="resultTraining"><option value="">Odaberi trening ili vlastiti datum</option></select></label>
 <label class="field" id="resultDateField">Datum meča<input id="resultDate" type="date" required></label>
 <div class="result-form-section">👥 Igrači</div>
-<div class="result-players-grid">
- <div class="result-player-side">
-  <h3 class="result-side-title">🏸 Moja ekipa</h3>
+<div class="result-players-grid" role="group" aria-label="Odabir igrača za obje ekipe">
+ <div class="result-player-side result-my-side">
+  <div class="result-side-title"><span class="result-side-symbol" aria-hidden="true">🔵</span><span class="result-side-headline"><strong>MOJA EKIPA</strong><small>Plava strana · naši igrači</small></span><span class="result-side-tag">A</span></div>
   <label class="field">Igrač 1<select id="resultA1" required></select></label>
   <label class="field result-extra hidden" id="resultA2Field">Igrač 2<select id="resultA2"></select></label>
  </div>
+ <div class="result-versus-divider" aria-hidden="true"><span>PROTIV</span></div>
  <div class="result-player-side result-opponents-side">
-  <h3 class="result-side-title">⚔️ Protivnici</h3>
+  <div class="result-side-title"><span class="result-side-symbol" aria-hidden="true">🔴</span><span class="result-side-headline"><strong>PROTIVNICI</strong><small>Crvena strana · suparnici</small></span><span class="result-side-tag">B</span></div>
   <label class="field">Igrač 1<select id="resultB1" required></select></label>
   <label class="field result-extra hidden" id="resultB2Field">Igrač 2<select id="resultB2"></select></label>
  </div>
