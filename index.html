@@ -721,7 +721,7 @@ function renderMoreStats(){
   const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
   const myTeam=r.meOnA?r.teamANames:r.teamBNames;
   const otherTeam=r.meOnA?r.teamBNames:r.teamANames;
-  teams.append(node('strong','','Moja ekipa: '+shortTeam(myTeam)+' – '+shortTeam(otherTeam)));
+  teams.append(node('strong','',shortTeam(myTeam)+' – '+shortTeam(otherTeam)));
   teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')));
   const personalWon=r.won;
   const myScore=r.meOnA?String(r.setsA)+' : '+String(r.setsB):String(r.setsB)+' : '+String(r.setsA);
