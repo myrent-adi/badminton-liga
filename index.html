@@ -488,6 +488,11 @@ body.modal-open{overflow:hidden}
 #screen-home .stats .stat b{font-size:clamp(29px,7.5vw,37px);font-weight:900;line-height:1.1;letter-spacing:-.02em}
 #screen-home .stats .stat span{font-size:clamp(12px,3.35vw,14px);font-weight:750;line-height:1.2;text-align:center}
 @media(max-width:360px){#screen-home .stats{gap:6px}#screen-home .stats .stat{min-height:85px;padding:12px 2px}#screen-home .stats .stat span{font-size:12px}}
+
+/* Four evenly sized attendance category tabs, in voting order. */
+#attendanceModal .attendance-filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;padding:0 0 16px}
+#attendanceModal .attendance-filter{min-width:0;width:100%;text-align:center;white-space:normal;line-height:1.3;padding:10px 7px;font-size:14px;font-weight:800;min-height:47px}
+@media(min-width:580px){#attendanceModal .attendance-filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -642,7 +647,7 @@ import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} f
 import {getFirestore,doc,getDoc,getDocFromServer,setDoc,addDoc,deleteDoc,serverTimestamp,onSnapshot,collection,query,updateDoc,deleteField} from 'https://www.gstatic.com/firebasejs/12.4.0/firebase-firestore.js';
 const firebaseConfig={apiKey:'AIzaSyCEgQgsZtKaFMiGCIimDOgwgx0O0OohvmY',authDomain:'badminton-liga-8d4ec.firebaseapp.com',projectId:'badminton-liga-8d4ec',storageBucket:'badminton-liga-8d4ec.firebasestorage.app',messagingSenderId:'944877889919',appId:'1:944877889919:web:7e3e98f0d89ebe6018524a'};
 const firebase=initializeApp(firebaseConfig),auth=getAuth(firebase),db=getFirestore(firebase),provider=new GoogleAuthProvider();provider.setCustomParameters({prompt:'select_account'});
-const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle('hidden',!value);let unsubscribers=[],generation=0,currentRole='player',playersCache=[],trainingCache=[],trainingVoteUnsubs=[],editingTrainingId=null,trainingShownMonth=new Date().getMonth(),trainingShownYear=new Date().getFullYear(),trainingAttendanceFilter='all',openAttendanceTrainingId=null,attendanceModalFocus=null,trainingVoteData={},resultsCache=[],resultModalReturnFocus=null,editingResultId=null,resultEditMode=false,resultsShownMonth=new Date().getMonth(),resultsShownYear=new Date().getFullYear(),resultsSelectedDay=null,homeVotesUnsub=null,homeTrainingId=null,homeVotes=[],approvedGoogleUserIds=null,trainingEditMode=false,playerEditMode=false,playerModalReturnFocus=null,playerListTab="active",approvedPlayersGoogle=[],playerAdminRoles={};
+const $=id=>document.getElementById(id),show=(id,value)=>$(id).classList.toggle('hidden',!value);let unsubscribers=[],generation=0,currentRole='player',playersCache=[],trainingCache=[],trainingVoteUnsubs=[],editingTrainingId=null,trainingShownMonth=new Date().getMonth(),trainingShownYear=new Date().getFullYear(),trainingAttendanceFilter='yes',openAttendanceTrainingId=null,attendanceModalFocus=null,trainingVoteData={},resultsCache=[],resultModalReturnFocus=null,editingResultId=null,resultEditMode=false,resultsShownMonth=new Date().getMonth(),resultsShownYear=new Date().getFullYear(),resultsSelectedDay=null,homeVotesUnsub=null,homeTrainingId=null,homeVotes=[],approvedGoogleUserIds=null,trainingEditMode=false,playerEditMode=false,playerModalReturnFocus=null,playerListTab="active",approvedPlayersGoogle=[],playerAdminRoles={};
 function clearWatches(){unsubscribers.forEach(fn=>fn());unsubscribers=[];trainingVoteUnsubs.forEach(fn=>fn());trainingVoteUnsubs=[];if(homeVotesUnsub){homeVotesUnsub();homeVotesUnsub=null}homeTrainingId=null;homeVotes=[];approvedGoogleUserIds=null}
 function notify(message,isError=false){$('message').textContent=message;$('message').classList.toggle('error',isError)}
 function readableError(error){let code=error?.code||'';if(code.includes('popup-closed'))return 'Prozor prijave je zatvoren.';if(code.includes('popup-blocked'))return 'Preglednik je blokirao prijavu. Dopusti skočne prozore.';if(code.includes('unauthorized-domain'))return 'GitHub domena nije dopuštena u Firebase Authentication.';if(code.includes('permission-denied'))return 'Pristup Firestoreu nije dopušten. Provjeri Firebase sigurnosna pravila.';return `Pogreška: ${code||error?.message||'nepoznata greška'}`}
@@ -1030,7 +1035,7 @@ async function changeTrainingActive(id,button){
 function openAttendanceModal(trainingId){
  const training=trainingCache.find(t=>t.id===trainingId);
  if(!training)return;
- openAttendanceTrainingId=trainingId;trainingAttendanceFilter='all';
+ openAttendanceTrainingId=trainingId;trainingAttendanceFilter='yes';
  attendanceModalFocus=document.activeElement;
  show('attendanceModal',true);$('attendanceModal').setAttribute('aria-hidden','false');
  document.body.classList.add('modal-open');
@@ -1056,10 +1061,26 @@ document.addEventListener('keydown',e=>{
  }
 });
 function buildAttendanceRows(votes){
- const rows=votes.filter(v=>['yes','no','maybe'].includes(v.choice))
-  .map(v=>({name:typeof v.displayName==='string'&&v.displayName.trim()?v.displayName.trim():'Google korisnik',choice:v.choice}))
-  .sort((a,b)=>a.name.localeCompare(b.name,'hr'));
- const counts={yes:rows.filter(r=>r.choice==='yes').length,no:rows.filter(r=>r.choice==='no').length,maybe:rows.filter(r=>r.choice==='maybe').length};
+ const eligible=approvedGoogleUserIds;
+ const validVotes=votes.filter(v=>['yes','no','maybe'].includes(v.choice)&&(!eligible||eligible.has(v.id)));
+ const rows=validVotes.map(v=>({
+  id:v.id,name:typeof v.displayName==='string'&&v.displayName.trim()?v.displayName.trim():'Google korisnik',choice:v.choice
+ }));
+ const counts={yes:rows.filter(r=>r.choice==='yes').length,no:rows.filter(r=>r.choice==='no').length,maybe:rows.filter(r=>r.choice==='maybe').length,pending:null};
+ // The admin users listener supplies the approved Google accounts. Never count manual players as pending.
+ if(eligible){
+  const responded=new Set(rows.map(r=>r.id));
+  const knownUsers=new Map(approvedPlayersGoogle.map(u=>[u.uid,u]));
+  const current=auth.currentUser;
+  if(current&&eligible.has(current.uid)&&!knownUsers.has(current.uid))knownUsers.set(current.uid,{displayName:current.displayName||'Google korisnik'});
+  for(const uid of eligible){
+   if(responded.has(uid))continue;
+   const user=knownUsers.get(uid);
+   rows.push({id:uid,name:user?.displayName||'Google korisnik',choice:'pending'});
+  }
+  counts.pending=rows.filter(r=>r.choice==='pending').length;
+ }
+ rows.sort((a,b)=>a.name.localeCompare(b.name,'hr'));
  return {rows,counts};
 }
 function renderAttendanceModal(){
@@ -1073,15 +1094,19 @@ function renderAttendanceModal(){
  if(data.error){body.append(node('p','attendance-note',data.error));return}
  const votes=data.votes||[],{rows,counts}=buildAttendanceRows(votes);
  const filters=node('div','attendance-filters');
- const entries=[['all','Svi',rows.length],['yes','Dolaze',counts.yes],['no','Ne dolaze',counts.no],['maybe','Možda',counts.maybe]];
+ const entries=[['yes','Dolaze',counts.yes],['no','Ne dolaze',counts.no],['maybe','Možda',counts.maybe],['pending','Nema odgovora',counts.pending]];
  const list=node('div','attendance-player-list');
  function fill(){
   list.replaceChildren();
-  const selected=rows.filter(r=>trainingAttendanceFilter==='all'||(r.choice===trainingAttendanceFilter));
+  if(trainingAttendanceFilter==='pending'&&counts.pending===null){
+   list.append(node('p','attendance-empty','Popis članova bez odgovora dostupan je vlasniku i administratorima.'));
+   return;
+  }
+  const selected=rows.filter(r=>r.choice===trainingAttendanceFilter);
   if(!selected.length){list.append(node('p','attendance-empty','Nema igrača u ovoj skupini.'));return}
   for(const {name,choice} of selected){
    const row=node('div','attendance-player-row'),left=node('div','attendance-player-left');
-   const initials=name.split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
+   const initials=name.split(/\\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join('').toUpperCase();
    left.append(node('span','attendance-avatar',initials),node('span','attendance-player-name',name));
    const status=choice==='yes'?['✓ Dolazi','yes']:choice==='no'?['✕ Ne dolazi','no']:choice==='maybe'?['? Možda','maybe']:['— Bez odgovora','pending'];
    row.append(left,node('span','attendance-state '+status[1],status[0]));
@@ -1089,7 +1114,7 @@ function renderAttendanceModal(){
   }
  }
  for(const [key,label,value] of entries){
-  const button=node('button','attendance-filter'+(trainingAttendanceFilter===key?' active':''),label+' ('+value+')');
+  const button=node('button','attendance-filter'+(trainingAttendanceFilter===key?' active':''),label+' ('+(value===null?'–':value)+')');
   button.type='button';button.setAttribute('aria-pressed',String(trainingAttendanceFilter===key));
   button.addEventListener('click',()=>{
    trainingAttendanceFilter=key;
@@ -1532,7 +1557,7 @@ $('adminCount').textContent=`${users.length} registriranih · ${users.filter(use
 const host=$('userRows');host.replaceChildren();if(!users.length){host.append(node('p','muted','Još nema registriranih igrača.'));return}
 for(const user of users){const row=node('div','user-row'),info=node('div'),name=node('strong','',user.displayName||'Nepoznati igrač'),mail=node('small','',user.email||''),status=node('span','pill '+(user.status==='approved'?'ok':user.status==='rejected'?'no':''),user.status==='approved'?'Odobren':user.status==='rejected'?'Odbijen':'Čeka');info.append(name,mail,status);row.append(info);const actions=node('div','actions');if(user.status!=='approved'){const b=node('button','button','✓ Odobri');b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b)}if(user.status!=='rejected'){const b=node('button','button danger','Odbij');b.addEventListener('click',()=>changeStatus(user.id,'rejected',b));actions.append(b)}row.append(actions);host.append(row)}}
 async function changeStatus(uid,status,button){button.disabled=true;try{await updateDoc(doc(db,'users',uid),{status});notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.')}catch(error){notify(readableError(error),true)}finally{button.disabled=false}}
-onAuthStateChanged(auth,async user=>{const current=++generation;clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);closePlayerModal();closeResultModal();closeTrainingModal();closeAttendanceModal();closeTrainingEdit();trainingAttendanceFilter='all';trainingEditMode=false;updateTrainingEditModeButton();playerEditMode=false;playerListTab='active';approvedPlayersGoogle=[];playerAdminRoles={};updatePlayerEditModeButton();resultEditMode=false;updateResultEditModeButton();trainingShownMonth=new Date().getMonth();trainingShownYear=new Date().getFullYear();resultsShownMonth=new Date().getMonth();resultsShownYear=new Date().getFullYear();resultsSelectedDay=null;trainingCache=[];trainingVoteData={};resultsCache=[];$('resultsList').replaceChildren(node('div','hint','Učitavanje rezultata…'));$('homeRecentResults').replaceChildren(node('div','hint','Učitavanje rezultata…'));currentRole='player';playersCache=[];$('homeMemberCount').textContent='Učitavanje prijava…';$('homeMemberCount').disabled=true;for(const id of ['homeYesCount','homeNoCount','homeMaybeCount'])$(id).textContent='–';finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
+onAuthStateChanged(auth,async user=>{const current=++generation;clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);closePlayerModal();closeResultModal();closeTrainingModal();closeAttendanceModal();closeTrainingEdit();trainingAttendanceFilter='yes';trainingEditMode=false;updateTrainingEditModeButton();playerEditMode=false;playerListTab='active';approvedPlayersGoogle=[];playerAdminRoles={};updatePlayerEditModeButton();resultEditMode=false;updateResultEditModeButton();trainingShownMonth=new Date().getMonth();trainingShownYear=new Date().getFullYear();resultsShownMonth=new Date().getMonth();resultsShownYear=new Date().getFullYear();resultsSelectedDay=null;trainingCache=[];trainingVoteData={};resultsCache=[];$('resultsList').replaceChildren(node('div','hint','Učitavanje rezultata…'));$('homeRecentResults').replaceChildren(node('div','hint','Učitavanje rezultata…'));currentRole='player';playersCache=[];$('homeMemberCount').textContent='Učitavanje prijava…';$('homeMemberCount').disabled=true;for(const id of ['homeYesCount','homeNoCount','homeMaybeCount'])$(id).textContent='–';finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;renderMoreProfile();$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
 try{const userRef=doc(db,'users',user.uid),adminRef=doc(db,'admins',user.uid);const [adminDoc,profileDoc]=await Promise.all([getDocFromServer(adminRef),getDoc(userRef)]);if(current!==generation)return;const role=adminDoc.exists()&&['owner','admin'].includes(adminDoc.data().role)?adminDoc.data().role:'player';$('roleDiagnostic').textContent=adminDoc.exists()?'Provjera: admins dokument postoji, uloga = '+String(adminDoc.data().role):'Provjera: admins dokument nije pronađen za prijavljeni UID ('+user.uid+').';show('roleDiagnostic',role==='player');const isAdmin=role==='owner'||role==='admin';currentRole=role;renderMoreProfile();if(!adminDoc.exists())notify('Dijagnostika: dokument admins/'+user.uid+' nije pronađen u bazi. Provjeri potpuno isti UID.',true);else if(!isAdmin)notify('Dijagnostika: admins dokument postoji, ali je role='+String(adminDoc.data().role)+'. Očekuje se owner ili admin.',true);show('openPlayerModal',isAdmin);show('togglePlayerEditMode',isAdmin);show('openTrainingModal',isAdmin);show('toggleTrainingEditMode',isAdmin);show('openResultModal',isAdmin);show('toggleResultEditMode',isAdmin);$('accountRole').textContent=role==='owner'?'👑 Vlasnik aplikacije · igrač':role==='admin'?'🛡️ Administrator · igrač':'🏸 Igrač';$('adminHeading').textContent=role==='owner'?'👑 Vlasnik · upravljanje članovima':'🛡️ Administracija · prijave članova';if(!profileDoc.exists()){try{await setDoc(userRef,{displayName:user.displayName||'Igrač',email:user.email||'',status:'pending'})}catch(error){if(error.code!=='permission-denied')throw error;const duplicate=await getDoc(userRef);if(!duplicate.exists())throw error}}if(current!==generation)return;
 const unProfile=onSnapshot(userRef,snapshot=>{if(current!==generation)return;statusView(snapshot.exists()?snapshot.data().status:'pending',role)},error=>notify(readableError(error),true));unsubscribers.push(unProfile);
@@ -1550,7 +1575,8 @@ const unUsers=onSnapshot(query(collection(db,'users')),snapshot=>{
  eligible.add(auth.currentUser.uid);
  approvedGoogleUserIds=eligible;
  renderHomeAttendance();
-},error=>{approvedPlayersGoogle=[];approvedGoogleUserIds=null;renderPlayers();renderHomeAttendance();notify(readableError(error),true)});unsubscribers.push(unUsers)}
+ if(openAttendanceTrainingId)renderAttendanceModal();
+},error=>{approvedPlayersGoogle=[];approvedGoogleUserIds=null;renderPlayers();renderHomeAttendance();if(openAttendanceTrainingId)renderAttendanceModal();notify(readableError(error),true)});unsubscribers.push(unUsers)}
 }catch(error){if(current!==generation)return;notify(readableError(error),true);$('roleDiagnostic').textContent='Ne mogu provjeriti admins zapis: '+readableError(error);show('roleDiagnostic',true);show('uidArea',true)}});
 if('serviceWorker' in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 </script>
