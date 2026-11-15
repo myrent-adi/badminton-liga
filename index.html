@@ -696,7 +696,7 @@ function renderMoreProfile(){
  const name=myLinkedPlayer()?.name||user.displayName||'Google korisnik';
  $('moreName').textContent=name;
  const created=user.metadata?.creationTime?new Date(user.metadata.creationTime):null;
- $('moreSince').textContent=created&&!isNaN(created)?'🏸 U aplikaciji od '+created.getFullYear()+'.':'🏸 Član zajednice';
+ $('moreSince').textContent=created&&!isNaN(created)?'🏸 U aplikaciji od '+new Intl.DateTimeFormat('hr-HR',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Europe/Zagreb'}).format(created):'🏸 Član zajednice';
  $('moreRole').textContent=currentRole==='owner'?'👑 Vlasnik':currentRole==='admin'?'🛡️ Admin':'🏸 Igrač';
  $('moreInitials').textContent=name.trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('')||'🏸';
  const img=$('morePhoto');
