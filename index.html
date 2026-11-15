@@ -434,7 +434,7 @@ body.modal-open{overflow:hidden}
 #moreStats .more-match-score.win{color:var(--green)}
 #moreStats .more-match-score.loss{color:var(--red)}
 #moreStats .more-match-score small{color:var(--muted)}
-.group-match-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--muted);font-size:11px;margin:0 0 10px;line-height:1.35}</style>
+.group-match-legend{display:flex;flex-wrap:wrap;gap:7px 12px;color:var(--muted);font-size:11px;margin:0 0 10px;line-height:1.35}#moreStats .more-match-outcome{display:block;font-size:11px;font-weight:800;line-height:1.35;margin-top:1px}#moreStats .more-match-outcome.win{color:var(--green)}#moreStats .more-match-outcome.loss{color:var(--red)}</style>
 </head>
 <body>
 <div id="launchScreen" class="launch-screen" role="status" aria-label="Pokretanje aplikacije Silent Zagreb Badminton"><img src="./assets/silent-zagreb-logo.jpg" alt=""><strong>Silent Zagreb Badminton</strong><small>Pokretanje aplikacije…</small></div>
@@ -570,7 +570,7 @@ body.modal-open{overflow:hidden}
 <div class="group-ring-item"><div class="group-ring doubles" id="groupRingDoubles"><div><small>Parovi</small><strong id="groupRateDoubles">0%</strong><span id="groupDetailDoubles">0/0</span></div></div></div>
 <div class="group-ring-item"><div class="group-ring total" id="groupRingTotal"><div><small>Ukupno</small><strong id="groupRateTotal">0%</strong><span id="groupDetailTotal">0/0</span></div></div></div>
 </div></div>
-<div class="more-match-card group-recent-card"><h3>Zadnjih 5 mečeva</h3><p class="group-match-legend"><span>🟢 Prva ekipa pobijedila</span><span>🔴 Prva ekipa izgubila</span></p><div id="moreMatchRows"></div></div>
+<div class="more-match-card group-recent-card"><h3>Mojih zadnjih 5 mečeva</h3><p class="group-match-legend"><span>🟢 Moja pobjeda</span><span>🔴 Moj poraz</span></p><div id="moreMatchRows"></div></div>
 <p class="muted group-stats-note">Prikaz prema spremljenim rezultatima lige. Uspjeh je udio mečeva završenih rezultatom 2 : 0 (pobjeda bez izgubljenog seta); za sva tri prikaza računa se na jednak način.</p>
 </div>
 <div id="moreAbout" class="hidden"><button class="more-back" data-more-back type="button">‹ Natrag</button><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit">💻 Ideja, dizajn i izrada: <strong>Adi · web programer</strong><br>💙 Za zajednicu Silent Zagreb Badminton.</div></div></div>
@@ -668,19 +668,23 @@ function renderMoreStats(){
   $('groupRing'+key).style.setProperty('--progress',rate.percentage+'%');
  }
  const host=$('moreMatchRows');host.replaceChildren();
- const recent=[...filtered].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||String(b.id||'').localeCompare(String(a.id||''))).slice(0,5);
- if(!recent.length){host.append(node('p','muted','Nema spremljenih mečeva za odabranu vrstu.'));return}
+ const recent=personalMatches().filter(r=>groupStatsType==='all'||r.type===groupStatsType).slice(0,5);
+ if(!recent.length){host.append(node('p','muted','Nema tvojih spremljenih mečeva za odabranu vrstu. Ako su rezultati uneseni pod drugim profilom, poveži Google račun s igračem.'));return}
  for(const r of recent){
   const row=node('div','more-match-row');
   const teams=node('div','more-opponent');
   const shortTeam=names=>(Array.isArray(names)&&names.length?names:['Tim']).map(shortResultPlayerName).join(' / ');
-  teams.append(node('strong','',shortTeam(r.teamANames)+' – '+shortTeam(r.teamBNames)));
+  const myTeam=r.meOnA?r.teamANames:r.teamBNames;
+  const otherTeam=r.meOnA?r.teamBNames:r.teamANames;
+  teams.append(node('strong','','Moja ekipa: '+shortTeam(myTeam)+' – '+shortTeam(otherTeam)));
   teams.append(node('small','',String(r.date||'')+' · '+(r.type==='doubles'?'Parovi':'Pojedinačno')));
-  const teamAWon=Number(r.setsA)>Number(r.setsB);
-  const teamBWon=Number(r.setsB)>Number(r.setsA);
-  const score=node('div','more-match-score '+(teamAWon?'win':teamBWon?'loss':''),String(r.setsA)+' : '+String(r.setsB));
-  score.setAttribute('aria-label',String(r.setsA)+' prema '+String(r.setsB)+(teamAWon?', pobjeda prve ekipe':teamBWon?', poraz prve ekipe':''));
-  const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>p.a+':'+p.b).join(', '):'';
+  const personalWon=r.won;
+  const myScore=r.meOnA?String(r.setsA)+' : '+String(r.setsB):String(r.setsB)+' : '+String(r.setsA);
+  const score=node('div','more-match-score '+(personalWon?'win':'loss'),myScore);
+  score.setAttribute('aria-label','Tvoj rezultat '+myScore+(personalWon?', pobjeda':', poraz'));
+  const resultLabel=node('span','more-match-outcome '+(personalWon?'win':'loss'),personalWon?'Pobjeda':'Poraz');
+  score.append(resultLabel);
+  const points=Array.isArray(r.pointSets)?r.pointSets.map(p=>r.meOnA?p.a+':'+p.b:p.b+':'+p.a).join(', '):'';
   if(points)score.append(node('small','','('+points+')'));
   const icon=node('span','more-match-symbol '+(r.type==='doubles'?'match-icon-doubles':'match-icon-singles'));
   icon.setAttribute('role','img');
