@@ -147,7 +147,7 @@ service cloud.firestore {
     function validResultData() {
       return request.resource.data.keys().hasOnly([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
-          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'
+          'setsA', 'setsB', 'pointSets', 'note', 'interrupted', 'trainingId', 'createdBy', 'createdAt', 'updatedBy', 'updatedAt'
         ])
         && request.resource.data.keys().hasAll([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
@@ -184,39 +184,56 @@ service cloud.firestore {
         && request.resource.data.setsA is int
         && request.resource.data.setsB is int
         && request.resource.data.pointSets is list
-        && request.resource.data.pointSets.size() >= 2
-        && request.resource.data.pointSets.size() <= 3
-        && validPointSet(request.resource.data.pointSets[0])
-        && validPointSet(request.resource.data.pointSets[1])
-        && (request.resource.data.pointSets.size() == 2
-            || validPointSet(request.resource.data.pointSets[2]))
-        && (request.resource.data.setsA == 2 || request.resource.data.setsB == 2)
-        && request.resource.data.setsA + request.resource.data.setsB == request.resource.data.pointSets.size()
-        && request.resource.data.setsA <= 2
-        && request.resource.data.setsB <= 2
         && (
-          (request.resource.data.pointSets.size() == 2
+          (
+            request.resource.data.keys().hasAny(['interrupted'])
+            && request.resource.data.interrupted == true
+            && request.resource.data.pointSets.size() == 1
+            && validPointSet(request.resource.data.pointSets[0])
             && (
-              (request.resource.data.setsA == 2
-                && request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
-                && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
-              || (request.resource.data.setsB == 2
-                && request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
-                && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
-            ))
-          || (request.resource.data.pointSets.size() == 3
-            && (
-              (request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
-                && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
-              || (request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
-                && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
+              (request.resource.data.setsA == 1 && request.resource.data.setsB == 0
+                && request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b)
+              || (request.resource.data.setsA == 0 && request.resource.data.setsB == 1
+                && request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b)
             )
+          )
+          || (
+            !request.resource.data.keys().hasAny(['interrupted'])
+            && request.resource.data.pointSets.size() >= 2
+            && request.resource.data.pointSets.size() <= 3
+            && validPointSet(request.resource.data.pointSets[0])
+            && validPointSet(request.resource.data.pointSets[1])
+            && (request.resource.data.pointSets.size() == 2
+                || validPointSet(request.resource.data.pointSets[2]))
+            && (request.resource.data.setsA == 2 || request.resource.data.setsB == 2)
+            && request.resource.data.setsA + request.resource.data.setsB == request.resource.data.pointSets.size()
+            && request.resource.data.setsA <= 2
+            && request.resource.data.setsB <= 2
             && (
-              (request.resource.data.setsA == 2
-                && request.resource.data.pointSets[2].a > request.resource.data.pointSets[2].b)
-              || (request.resource.data.setsB == 2
-                && request.resource.data.pointSets[2].a < request.resource.data.pointSets[2].b)
-            ))
+              (request.resource.data.pointSets.size() == 2
+                && (
+                  (request.resource.data.setsA == 2
+                    && request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
+                    && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
+                  || (request.resource.data.setsB == 2
+                    && request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
+                    && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
+                ))
+              || (request.resource.data.pointSets.size() == 3
+                && (
+                  (request.resource.data.pointSets[0].a > request.resource.data.pointSets[0].b
+                    && request.resource.data.pointSets[1].a < request.resource.data.pointSets[1].b)
+                  || (request.resource.data.pointSets[0].a < request.resource.data.pointSets[0].b
+                    && request.resource.data.pointSets[1].a > request.resource.data.pointSets[1].b)
+                )
+                && (
+                  (request.resource.data.setsA == 2
+                    && request.resource.data.pointSets[2].a > request.resource.data.pointSets[2].b)
+                  || (request.resource.data.setsB == 2
+                    && request.resource.data.pointSets[2].a < request.resource.data.pointSets[2].b)
+                ))
+            )
+          )
         )
         && request.resource.data.note is string
         && request.resource.data.note.size() <= 300
@@ -242,7 +259,7 @@ service cloud.firestore {
         && validResultData()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
           'date', 'type', 'teamA', 'teamB', 'teamANames', 'teamBNames',
-          'setsA', 'setsB', 'pointSets', 'note', 'trainingId', 'updatedBy', 'updatedAt'
+          'setsA', 'setsB', 'pointSets', 'note', 'interrupted', 'trainingId', 'updatedBy', 'updatedAt'
         ])
         && request.resource.data.createdBy == resource.data.createdBy
         && request.resource.data.createdAt == resource.data.createdAt
