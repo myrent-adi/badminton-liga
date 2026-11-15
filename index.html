@@ -1456,6 +1456,15 @@ function renderResults(){renderMoreStats();
  // The home panel only shows matches from the latest day that has results.
  const latestDate=sorted[0].date;
  const latestResults=sorted.filter(r=>r.date===latestDate);
+ const dateParts=String(latestDate||'').split('-').map(Number);
+ let dateHeading=String(latestDate||'');
+ if(dateParts.length===3&&dateParts.every(Number.isInteger)){
+  const [year,month,day]=dateParts;
+  const dayDate=new Date(Date.UTC(year,month-1,day,12));
+  const weekday=new Intl.DateTimeFormat('hr-HR',{weekday:'long',timeZone:'UTC'}).format(dayDate);
+  dateHeading=weekday.charAt(0).toLocaleUpperCase('hr-HR')+weekday.slice(1)+', '+day+'.'+month+'.'+year+'.';
+ }
+ recent.append(node('h3','recent-result-date',dateHeading));
  for(const r of latestResults){
   const row=node('div','recent-result-row recent-result-list-row');
   const doubles=r.type==='doubles';
