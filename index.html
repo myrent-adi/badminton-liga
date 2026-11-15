@@ -600,6 +600,42 @@ body.preview-player #uidArea{display:none!important}
  #moreAbout .more-back span,.group-stats-heading .group-stats-back span{color:#ffffff}
  #moreAbout .more-back:active,.group-stats-heading .group-stats-back:active{background:#1b537f}
 }
+
+/* Clear approval workflow for club member registrations. */
+#admin{padding:17px 15px;border-radius:19px}
+#admin .admin-section-heading{display:flex;gap:11px;align-items:center;margin-bottom:17px}
+#admin .admin-section-icon{display:grid;place-items:center;flex:0 0 43px;width:43px;height:43px;background:var(--accent-soft);border-radius:13px;font-size:21px}
+#admin .admin-section-heading h2{font-size:17px;line-height:1.25;margin:0 0 4px;font-weight:850}
+#admin .admin-section-heading p{margin:0;font-size:12px;line-height:1.5}
+#admin .admin-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:20px}
+#admin .admin-summary-tile{display:flex;min-width:0;flex-direction:column;gap:5px;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:13px;padding:12px 5px;background:var(--panel2)}
+#admin .admin-summary-tile strong{font-size:25px;font-weight:900;line-height:1}
+#admin .admin-summary-tile span{font-size:11px;font-weight:750;color:var(--muted);text-align:center;line-height:1.3}
+#admin .admin-summary-tile.pending strong{color:var(--yellow)}
+#admin .admin-summary-tile.approved strong{color:var(--green)}
+#admin .admin-summary-tile.total strong{color:var(--ink)}
+#admin .admin-users-heading{font-size:14px;font-weight:850;margin:0 0 12px;color:var(--ink)}
+#admin .admin-user-list{display:flex;flex-direction:column;gap:10px}
+#admin .admin-member-card{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--panel);min-width:0}
+#admin .admin-member-card.is-pending{border-color:#ddac5b;background:var(--panel2)}
+#admin .admin-member-top{display:flex;align-items:center;gap:10px;min-width:0;flex-wrap:wrap}
+#admin .admin-member-avatar{display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;border-radius:13px;background:var(--accent-soft);color:var(--accent);font-size:18px;font-weight:900}
+#admin .admin-member-identity{display:flex;flex:1 1 110px;flex-direction:column;gap:5px;min-width:0}
+#admin .admin-member-identity strong{font-size:14px;font-weight:850;overflow-wrap:anywhere}
+#admin .admin-member-email{font-size:12px;color:var(--muted);overflow-wrap:anywhere}
+#admin .admin-member-status{font-size:11px;font-weight:850;white-space:nowrap;border-radius:999px;padding:6px 9px}
+#admin .admin-member-status.pending{background:var(--yellowbg);color:var(--yellow)}
+#admin .admin-member-status.approved{background:var(--greenbg);color:var(--green)}
+#admin .admin-member-status.rejected{background:var(--redbg);color:var(--red)}
+#admin .admin-member-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}
+#admin .admin-member-actions:has(>button:only-child){grid-template-columns:1fr}
+#admin .admin-member-actions .button{min-width:0;width:100%;min-height:45px;padding:9px 6px;font-size:13px;font-weight:850}
+#admin .admin-member-actions .admin-approve{background:#086bd3;color:#fff}
+#admin .admin-member-actions .admin-reject{border:1px solid var(--red);background:var(--redbg);color:var(--red)}
+#admin .admin-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 12px;text-align:center;border:1px dashed var(--line);border-radius:15px;color:var(--muted);font-size:13px}
+#admin .admin-empty strong{font-size:15px;color:var(--ink)}
+#admin .admin-empty-icon{font-size:29px}
+@media(max-width:350px){#admin{padding:14px 11px}#admin .admin-member-status{font-size:10px}#admin .admin-summary-tile span{font-size:10px}}
 </style>
 </head>
 <body>
@@ -715,7 +751,7 @@ body.preview-player #uidArea{display:none!important}
 <div class="more-menu"><button class="more-menu-button" id="moreShowStats" type="button"><span class="more-menu-symbol">▥</span> Statistika <span class="more-chevron">›</span></button><button class="more-menu-button" id="moreShowAbout" type="button"><span class="more-menu-symbol">ⓘ</span> O aplikaciji <span class="more-chevron">›</span></button></div>
 <div id="ownerPreviewPanel" class="card owner-preview-panel hidden"><h2>👁️ Probni prikaz</h2><p class="muted">Pregledaj aplikaciju kao običan igrač, bez drugog Google računa. Ovo mijenja samo izgled, ne Firebase ovlasti.</p><button id="ownerPreviewToggle" type="button" class="button full">👁️ Prikaži kao igrač</button></div>
 <div class="card"><h2>Postavke</h2><div class="entry"><strong>Izgled aplikacije</strong><small>Prati tamnu ili svijetlu temu mobitela.</small></div><div class="entry"><strong>Instalacija</strong><small>iPhone: Safari → Dijeli → Dodaj na početni zaslon.<br>Android: Chrome → ⋮ → Instaliraj aplikaciju.</small></div></div>
-<div id="admin" class="card hidden"><h2 id="adminHeading">👑 Administracija · prijave članova</h2><p class="muted">Odobri ili odbij novog igrača.</p><div class="muted" id="adminCount">Učitavanje…</div><div id="userRows"></div></div>
+<div id="admin" class="card hidden"><div class="admin-section-heading"><span class="admin-section-icon" aria-hidden="true">👥</span><div><h2 id="adminHeading">👑 Upravljanje članovima</h2><p class="muted">Pregledaj prijave i upravljaj pristupom.</p></div></div><div id="adminCount" class="admin-summary" aria-live="polite">Učitavanje…</div><div id="userRows" class="admin-user-list"></div></div>
 <div id="accountMount"></div>
 </div>
 <div id="moreStats" class="hidden">
@@ -1845,10 +1881,46 @@ function renderResults(){renderMoreStats();
  }
 }
 function node(tag,cls,text){const element=document.createElement(tag);if(cls)element.className=cls;if(text!==undefined)element.textContent=text;return element}
-function showAdminUsers(snapshot){const users=snapshot.docs.map(doc=>({id:doc.id,...doc.data()})).sort((a,b)=>(a.status==='pending'?0:1)-(b.status==='pending'?0:1)||String(a.displayName||'').localeCompare(String(b.displayName||''),'hr'));
-$('adminCount').textContent=`${users.length} registriranih · ${users.filter(user=>user.status==='pending').length} čeka odobrenje`;
-const host=$('userRows');host.replaceChildren();if(!users.length){host.append(node('p','muted','Još nema registriranih igrača.'));return}
-for(const user of users){const row=node('div','user-row'),info=node('div'),name=node('strong','',user.displayName||'Nepoznati igrač'),mail=node('small','',user.email||''),status=node('span','pill '+(user.status==='approved'?'ok':user.status==='rejected'?'no':''),user.status==='approved'?'Odobren':user.status==='rejected'?'Odbijen':'Čeka');info.append(name,mail,status);row.append(info);const actions=node('div','actions');if(user.status!=='approved'){const b=node('button','button','✓ Odobri');b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b)}if(user.status!=='rejected'){const b=node('button','button danger','Odbij');b.addEventListener('click',()=>changeStatus(user.id,'rejected',b));actions.append(b)}row.append(actions);host.append(row)}}
+function showAdminUsers(snapshot){
+ const users=snapshot.docs.map(doc=>({id:doc.id,...doc.data()}))
+  .sort((a,b)=>(a.status==='pending'?0:a.status==='rejected'?2:1)-(b.status==='pending'?0:b.status==='rejected'?2:1)||String(a.displayName||'').localeCompare(String(b.displayName||''),'hr'));
+ const pending=users.filter(user=>user.status==='pending').length;
+ const approved=users.filter(user=>user.status==='approved').length;
+ const summary=$('adminCount');summary.replaceChildren();
+ for(const [count,label,kind] of [[pending,'Čeka odobrenje','pending'],[approved,'Odobreni','approved'],[users.length,'Ukupno','total']]){
+  const tile=node('div','admin-summary-tile '+kind);
+  tile.append(node('strong','',String(count)),node('span','',label));summary.append(tile);
+ }
+ const host=$('userRows');host.replaceChildren();
+ if(!users.length){
+  const empty=node('div','admin-empty');
+  empty.append(node('span','admin-empty-icon','👋'),node('strong','','Još nema registriranih igrača.'),node('span','','Kada se netko prijavi Google računom, pojavit će se ovdje.'));
+  host.append(empty);return;
+ }
+ const heading=node('h3','admin-users-heading',pending?'Prijave članova · '+pending+' na čekanju':'Popis članova');
+ host.append(heading);
+ for(const user of users){
+  const row=node('article','admin-member-card'+(user.status==='pending'?' is-pending':''));
+  const top=node('div','admin-member-top');
+  const displayName=String(user.displayName||'').trim()||'Nepoznati igrač';
+  const initial=displayName.charAt(0).toLocaleUpperCase('hr')||'•';
+  const avatar=node('span','admin-member-avatar',initial);
+  const identity=node('div','admin-member-identity');
+  identity.append(node('strong','',displayName),node('span','admin-member-email',user.email||'Bez e-mail adrese'));
+  const status=user.status==='approved'?['✓ Odobren','approved']:user.status==='rejected'?['✕ Odbijen','rejected']:['⏳ Čeka','pending'];
+  const badge=node('span','admin-member-status '+status[1],status[0]);
+  top.append(avatar,identity,badge);row.append(top);
+  const actions=node('div','admin-member-actions');
+  if(user.status!=='approved'){
+   const b=node('button','button admin-approve','✓ Odobri');b.type='button';b.addEventListener('click',()=>changeStatus(user.id,'approved',b));actions.append(b);
+  }
+  if(user.status!=='rejected'){
+   const b=node('button','button danger admin-reject','Odbij');b.type='button';b.addEventListener('click',()=>changeStatus(user.id,'rejected',b));actions.append(b);
+  }
+  if(actions.children.length)row.append(actions);
+  host.append(row);
+ }
+}
 async function changeStatus(uid,status,button){button.disabled=true;try{await updateDoc(doc(db,'users',uid),{status});notify(status==='approved'?'Igrač je odobren.':'Zahtjev je odbijen.')}catch(error){notify(readableError(error),true)}finally{button.disabled=false}}
 onAuthStateChanged(auth,async user=>{const current=++generation;playerPreview=false;document.body.classList.remove('preview-player');show('ownerPreviewPanel',false);clearWatches();show('loading',false);document.body.classList.remove('subpage');show('signedOut',!user);show('signedArea',!!user);show('pending',false);show('rejected',false);show('approvedArea',false);show('bottomNav',false);show('admin',false);closePlayerModal();closeResultModal();closeTrainingModal();closeAttendanceModal();closeTrainingEdit();trainingAttendanceFilter='yes';trainingEditMode=false;updateTrainingEditModeButton();playerEditMode=false;playerListTab='active';approvedPlayersGoogle=[];playerAdminRoles={};updatePlayerEditModeButton();resultEditMode=false;updateResultEditModeButton();trainingShownMonth=new Date().getMonth();trainingShownYear=new Date().getFullYear();resultsShownMonth=new Date().getMonth();resultsShownYear=new Date().getFullYear();resultsSelectedDay=null;trainingCache=[];trainingVoteData={};resultsCache=[];$('resultsList').replaceChildren(node('div','hint','Učitavanje rezultata…'));$('homeRecentResults').replaceChildren(node('div','hint','Učitavanje rezultata…'));currentRole='player';playersCache=[];$('homeMemberCount').textContent='Učitavanje prijava…';$('homeMemberCount').disabled=true;for(const id of ['homeYesCount','homeNoCount','homeMaybeCount'])$(id).textContent='–';finishEditPlayer();$('playersList').replaceChildren();$('playersCount').textContent='Učitavanje popisa…';notify('');if(!user)return;
 $('userName').textContent=user.displayName||'Google korisnik';$('userEmail').textContent=user.email||'';$('myUid').textContent=user.uid;renderMoreProfile();$('profileStatus').textContent='Provjera ovlasti…';$('accountRole').textContent='';
