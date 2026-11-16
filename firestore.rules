@@ -41,7 +41,9 @@ service cloud.firestore {
       allow delete: if false;
     }
     match /admins/{adminId} {
-      allow get: if isMember();
+      // A signed-in applicant must be able to check only their own admin record.
+      // Do not require prior approval merely to determine their role.
+      allow get: if signedIn() && (request.auth.uid == adminId || isMember());
       allow list: if isMember();
       allow create: if isOwner()
         && request.resource.data.keys().hasOnly(['role'])
