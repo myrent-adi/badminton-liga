@@ -868,14 +868,14 @@ body.preview-player #uidArea{display:none!important}
 <div class="group-stat-tile"><span aria-hidden="true">◎</span><strong id="groupSets">0</strong><small>setova</small></div>
 <div class="group-stat-tile"><span aria-hidden="true">🎯</span><strong id="groupSuccess">0%</strong><small>uspjeh</small></div>
 </div>
-<div class="group-success-card"><h3>Uspjeh po tipu meča</h3>
+<div class="group-success-card"><h3>Moj uspjeh po tipu meča</h3>
 <div class="group-rings">
 <div class="group-ring-item"><div class="group-ring singles" id="groupRingSingles"><div><small>Pojedinačni</small><strong id="groupRateSingles">0%</strong><span id="groupDetailSingles">0/0</span></div></div></div>
 <div class="group-ring-item"><div class="group-ring doubles" id="groupRingDoubles"><div><small>Parovi</small><strong id="groupRateDoubles">0%</strong><span id="groupDetailDoubles">0/0</span></div></div></div>
 <div class="group-ring-item"><div class="group-ring total" id="groupRingTotal"><div><small>Ukupno</small><strong id="groupRateTotal">0%</strong><span id="groupDetailTotal">0/0</span></div></div></div>
 </div></div>
 <div class="more-match-card group-recent-card"><h3>Moji mečevi</h3><div id="moreMatchRows"></div></div>
-<p class="muted group-stats-note">Prikaz prema spremljenim rezultatima lige. Uspjeh je udio mečeva završenih rezultatom 2 : 0 (pobjeda bez izgubljenog seta); za sva tri prikaza računa se na jednak način.</p>
+<p class="muted group-stats-note">Uspjeh je postotak tvojih pobjeda u odigranim mečevima. U parovima se pobjeda računa svakom igraču pobjedničkog para, a poraz svakom igraču poraženog para. Prekinuti mečevi ne ulaze u postotak.</p>
 </div>
 <div id="moreAbout" class="hidden"><div class="more-subpage-header"><button class="more-back" data-more-back type="button" aria-label="Natrag na Više"><span aria-hidden="true">‹</span></button><h2>O aplikaciji</h2></div><div class="more-about-card"><div class="more-about-icon">🏸</div><h2>Silent Zagreb Badminton</h2><p class="more-lead">Kad nas igra spaja, svaki poen ima svoju priču.</p><p>Ova aplikacija nastala je iz jednostavne ideje: da badminton ekipa u Zagrebu ima svoje mjesto za dogovor treninga, praćenje rezultata i zajedničke sportske uspomene.</p><p><strong>Adi Bajagilović</strong>, vlasnik aplikacije i web programer, osmislio je i izradio Silent Zagreb Badminton s posebnom pažnjom prema zajednici gluhih i nagluhih. Cilj je jednostavan: manje kompliciranih dogovora, više igre, druženja i veselja nakon dobrog meča.</p><p>Svaki trening nova je prilika za susret, svaki set nova mala priča, a svaki igrač važan dio naše zajednice.</p><div class="more-credit"><div class="more-credit-avatar" aria-hidden="true">💻</div><div class="more-credit-info"><span class="more-credit-eyebrow">IDEJA · DIZAJN · RAZVOJ</span><strong class="more-credit-name">Adi Bajagilović</strong><span class="more-credit-role">Web programer i autor aplikacije</span><span class="more-credit-note">💙 Izrađeno za zajednicu Silent Zagreb Badminton.</span></div></div></div></div>
 </section>
@@ -1008,12 +1008,12 @@ document.querySelectorAll('[data-group-type]').forEach(button=>button.addEventLi
  renderMoreStats();
 }));
 function groupMatchRate(matches){
- const completed=matches.filter(r=>r.interrupted!==true&&Number.isFinite(Number(r.setsA))&&Number.isFinite(Number(r.setsB)));
- const straight=completed.filter(r=>Math.max(Number(r.setsA),Number(r.setsB))===2&&Math.min(Number(r.setsA),Number(r.setsB))===0).length;
- return {count:straight,total:completed.length,percentage:completed.length?Math.round(100*straight/completed.length):0};
+ const completed=matches.filter(r=>r.interrupted!==true&&r.won!==null&&Number.isFinite(Number(r.setsA))&&Number.isFinite(Number(r.setsB))&&Number(r.setsA)!==Number(r.setsB));
+ const wins=completed.filter(r=>r.won===true).length;
+ return {count:wins,total:completed.length,percentage:completed.length?Math.round(100*wins/completed.length):0};
 }
 function renderMoreStats(){
- const all=resultsCache.filter(r=>r&&r.date&&(r.type==='singles'||r.type==='doubles')&&canSeeSharedMatch(r));
+ const all=personalMatches().filter(r=>r&&r.date&&(r.type==='singles'||r.type==='doubles'));
  const filtered=groupStatsType==='all'?all:all.filter(r=>r.type===groupStatsType);
  const ids=new Set(),names=new Set();
  for(const r of filtered){
@@ -1021,7 +1021,7 @@ function renderMoreStats(){
   for(const name of [...(Array.isArray(r.teamANames)?r.teamANames:[]),...(Array.isArray(r.teamBNames)?r.teamBNames:[])])if(name)names.add(String(name).trim().toLocaleLowerCase('hr'));
  }
  const activePlayers=playersCache.filter(p=>p.active===true).length;
- const totalPlayers=groupStatsType==='all'?Math.max(activePlayers,ids.size,names.size):Math.max(ids.size,names.size);
+ const totalPlayers=Math.max(ids.size,names.size);
  const sets=filtered.reduce((sum,r)=>sum+(Array.isArray(r.pointSets)&&r.pointSets.length?r.pointSets.length:(Number(r.setsA)||0)+(Number(r.setsB)||0)),0);
  $('groupMatches').textContent=String(filtered.length);
  $('groupPlayers').textContent=String(totalPlayers);
